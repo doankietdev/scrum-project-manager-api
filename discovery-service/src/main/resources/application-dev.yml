@@ -1,0 +1,10 @@
+spring:
+  security:
+    user:
+      name: dev
+      password: dev
+
+eureka:
+  server:
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 3000

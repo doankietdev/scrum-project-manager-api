@@ -1,0 +1,38 @@
+server:
+  port: 8081
+
+spring:
+  profiles:
+    default: dev-group
+    group:
+      dev-group:
+        - dev
+        - dev-local
+      prod-group:
+        - prod
+        - prod-local
+  application:
+    name: identity-service
+  jpa:
+    database: mysql
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+
+eureka:
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - '*'
+  endpoint:
+    health:
+      show-details: always

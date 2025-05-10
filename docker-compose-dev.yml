@@ -1,0 +1,104 @@
+name: scrum-project-manager-backend
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    volumes:
+      - ./environment/data/mysql:/var/lib/mysql
+      - ./environment/mysql/init:/docker-entrypoint-initdb.d/
+    command: [
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci',
+      '--skip-character-set-client-handshake'
+    ]
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
+      interval: 3s
+      timeout: 3s
+      retries: 3
+      start_period: 2s
+    networks:
+      - scrum-project-manager-backend-network
+  discovery-service:
+    image: discovery-service
+    container_name: discovery-service
+    build:
+      context: ./discovery-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8761:8761"
+    volumes:
+      - ./discovery-service/src:/home/devuser/app/src
+      - ./discovery-service/pom.xml:/home/devuser/app/pom.xml
+      - ~/.m2:/home/devuser/.m2
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:8761/actuator/health | jq -r .status | grep -q UP"]
+      interval: 5s
+      timeout: 3s
+      retries: 2
+      start_period: 10s
+    networks:
+      - scrum-project-manager-backend-network
+  api-gateway:
+    image: api-gateway
+    container_name: api-gateway
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./api-gateway/src:/home/devuser/app/src
+      - ./api-gateway/pom.xml:/home/devuser/app/pom.xml
+      - ~/.m2:/home/devuser/.m2
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:8080/actuator/health | jq -r .status | grep -q UP"]
+      interval: 5s
+      timeout: 3s
+      retries: 2
+      start_period: 10s
+    networks:
+      - scrum-project-manager-backend-network
+    depends_on:
+      - discovery-service
+  identity-service:
+    image: identity-service
+    container_name: identity-service
+    build:
+      context: ./identity-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./identity-service/src:/home/devuser/app/src
+      - ./identity-service/pom.xml:/home/devuser/app/pom.xml
+      - ~/.m2:/home/devuser/.m2
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:8081/actuator/health | jq -r .status | grep -q UP"]
+      interval: 5s
+      timeout: 3s
+      retries: 2
+      start_period: 10s
+    networks:
+      - scrum-project-manager-backend-network
+    depends_on:
+      - discovery-service
+      - api-gateway
+      - mysql
+
+networks:
+  scrum-project-manager-backend-network:
+    name: scrum-project-manager-backend-network
+    driver: bridge
