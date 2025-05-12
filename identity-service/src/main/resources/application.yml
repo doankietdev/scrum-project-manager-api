@@ -22,6 +22,8 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
+  flyway:
+    locations: classpath:db/migration
 
 eureka:
   instance:
@@ -36,3 +38,10 @@ management:
   endpoint:
     health:
       show-details: always
+
+app:
+  auth:
+    email-verification-otp-time: 300 # seconds
+    email-verification-otp-length: 6
+    access-token-time: 3600 # seconds
+    refresh-token-time: 604800 # seconds

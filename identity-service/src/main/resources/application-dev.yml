@@ -5,11 +5,15 @@ spring:
       minimum-idle: 2
       idle-timeout: 30000
       connection-timeout: 2000
-    url: jdbc:mysql://mysql:3306/user_service
+    url: jdbc:mysql://mysql:3306/identity_service
     username: dev
     password: dev
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
 
 eureka:
   client:
