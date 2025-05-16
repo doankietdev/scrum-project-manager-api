@@ -194,7 +194,6 @@ services:
         condition: service_healthy
 
   discovery-service:
-    image: discovery-service
     container_name: discovery-service
     build:
       context: ./discovery-service
@@ -205,7 +204,7 @@ services:
       - ./discovery-service/src:/home/devuser/app/src
       - ./discovery-service/target:/home/devuser/app/target
       - ./discovery-service/pom.xml:/home/devuser/app/pom.xml
-      - ~/.m2:/home/devuser/.m2
+      - ./environment/.m2:/home/devuser/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       EUREKA_USERNAME: dev
@@ -217,9 +216,8 @@ services:
           "curl -s -u $$EUREKA_USERNAME:$$EUREKA_PASSWORD http://localhost:8761/actuator/health | jq -r .status | grep -q UP",
         ]
       interval: 30s
-      timeout: 60s
+      timeout: 300s
       retries: 3
-      # start_period: 10s
     networks:
       - scrum-project-manager-backend-network
     depends_on:
@@ -232,7 +230,6 @@ services:
       redis-slave-2:
         condition: service_healthy
   api-gateway:
-    image: api-gateway
     container_name: api-gateway
     build:
       context: ./api-gateway
@@ -243,7 +240,7 @@ services:
       - ./api-gateway/src:/home/devuser/app/src
       - ./api-gateway/target:/home/devuser/app/target
       - ./api-gateway/pom.xml:/home/devuser/app/pom.xml
-      - ~/.m2:/home/devuser/.m2
+      - ./environment/.m2:/home/devuser/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
     healthcheck:
@@ -253,9 +250,8 @@ services:
           "curl -s http://localhost:8080/actuator/health | jq -r .status | grep -q UP",
         ]
       interval: 30s
-      timeout: 60s
+      timeout: 120s
       retries: 3
-      # start_period: 10s
     networks:
       - scrum-project-manager-backend-network
     depends_on:
@@ -270,7 +266,6 @@ services:
       discovery-service:
         condition: service_healthy
   identity-service:
-    image: identity-service
     container_name: identity-service
     build:
       context: ./identity-service
@@ -281,7 +276,7 @@ services:
       - ./identity-service/src:/home/devuser/app/src
       - ./identity-service/target:/home/devuser/app/target
       - ./identity-service/pom.xml:/home/devuser/app/pom.xml
-      - ~/.m2:/home/devuser/.m2
+      - ./environment/.m2:/home/devuser/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
     healthcheck:
@@ -291,9 +286,8 @@ services:
           "curl -s http://localhost:8081/actuator/health | jq -r .status | grep -q UP",
         ]
       interval: 30s
-      timeout: 60s
+      timeout: 120s
       retries: 3
-      # start_period: 10s
     networks:
       - scrum-project-manager-backend-network
     depends_on:

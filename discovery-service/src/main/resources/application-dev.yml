@@ -7,4 +7,5 @@ spring:
 eureka:
   server:
     enable-self-preservation: false
-    eviction-interval-timer-in-ms: 3000
+    eviction-interval-timer-in-ms: 60000
+    wait-time-in-ms-when-sync-empty: 0
