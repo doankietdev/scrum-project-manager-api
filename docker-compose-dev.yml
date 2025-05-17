@@ -229,6 +229,7 @@ services:
         condition: service_healthy
       redis-slave-2:
         condition: service_healthy
+  
   api-gateway:
     container_name: api-gateway
     build:
@@ -265,6 +266,7 @@ services:
         condition: service_healthy
       discovery-service:
         condition: service_healthy
+  
   identity-service:
     container_name: identity-service
     build:
