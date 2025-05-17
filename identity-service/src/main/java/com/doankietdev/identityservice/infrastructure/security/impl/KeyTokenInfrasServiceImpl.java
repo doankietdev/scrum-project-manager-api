@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.infrastructure.security;
+package com.doankietdev.identityservice.infrastructure.security.impl;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 
 import com.doankietdev.identityservice.application.model.dto.AuthKeyToken;
 import com.doankietdev.identityservice.application.model.dto.AuthUser;
-import com.doankietdev.identityservice.application.service.auth.AuthTokenService;
 import com.doankietdev.identityservice.infrastructure.config.AuthProperties;
+import com.doankietdev.identityservice.infrastructure.security.KeyTokenInfrasService;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -28,12 +28,12 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
-public class AuthTokenServiceImpl implements AuthTokenService {
+public class KeyTokenInfrasServiceImpl implements KeyTokenInfrasService {
   @Autowired
   AuthProperties authProperties;
 
   @Override
-  public AuthKeyToken createAuthKeyToken(AuthUser authUser) {
+  public AuthKeyToken createKeyToken(AuthUser authUser) {
     KeyPair keyPair;
     try {
       keyPair = createKeyPair();

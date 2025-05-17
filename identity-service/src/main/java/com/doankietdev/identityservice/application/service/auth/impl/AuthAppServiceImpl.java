@@ -18,7 +18,6 @@ import com.doankietdev.identityservice.application.model.dto.response.LoginRespo
 import com.doankietdev.identityservice.application.model.dto.response.RegisterResponse;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
 import com.doankietdev.identityservice.application.service.auth.AuthAppService;
-import com.doankietdev.identityservice.application.service.auth.AuthTokenService;
 import com.doankietdev.identityservice.domain.model.dto.LoginSessionCreate;
 import com.doankietdev.identityservice.domain.model.dto.OtpCreate;
 import com.doankietdev.identityservice.domain.model.dto.UserCreate;
@@ -32,6 +31,7 @@ import com.doankietdev.identityservice.domain.repository.LoginSessionRepository;
 import com.doankietdev.identityservice.domain.repository.OtpRepository;
 import com.doankietdev.identityservice.domain.repository.UserRepository;
 import com.doankietdev.identityservice.infrastructure.config.AuthProperties;
+import com.doankietdev.identityservice.infrastructure.security.KeyTokenInfrasService;
 
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -44,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class AuthAppServiceImpl implements AuthAppService {
-  AuthTokenService authTokenService;
+  KeyTokenInfrasService keyTokenService;
   UserRepository userRepository;
   LoginSessionRepository loginSessionRepository;
   OtpRepository otpRepository;
@@ -184,7 +184,7 @@ public class AuthAppServiceImpl implements AuthAppService {
           .build();
     }
 
-    AuthKeyToken authKeyToken = authTokenService.createAuthKeyToken(AuthUser.builder()
+    AuthKeyToken authKeyToken = keyTokenService.createKeyToken(AuthUser.builder()
         .userId(existsUser.getId())
         .build());
 
