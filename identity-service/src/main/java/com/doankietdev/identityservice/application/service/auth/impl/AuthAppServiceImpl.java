@@ -8,8 +8,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.doankietdev.identityservice.application.exception.AppException;
-import com.doankietdev.identityservice.application.model.dto.AuthKeyToken;
-import com.doankietdev.identityservice.application.model.dto.AuthUser;
 import com.doankietdev.identityservice.application.model.dto.request.AccountVerifyRequest;
 import com.doankietdev.identityservice.application.model.dto.request.LoginRequest;
 import com.doankietdev.identityservice.application.model.dto.request.RegisterRequest;
@@ -31,6 +29,8 @@ import com.doankietdev.identityservice.domain.repository.LoginSessionRepository;
 import com.doankietdev.identityservice.domain.repository.OtpRepository;
 import com.doankietdev.identityservice.domain.repository.UserRepository;
 import com.doankietdev.identityservice.infrastructure.config.AuthProperties;
+import com.doankietdev.identityservice.infrastructure.model.AuthUser;
+import com.doankietdev.identityservice.infrastructure.model.KeyToken;
 import com.doankietdev.identityservice.infrastructure.security.KeyTokenInfrasService;
 
 import jakarta.transaction.Transactional;
@@ -184,23 +184,23 @@ public class AuthAppServiceImpl implements AuthAppService {
           .build();
     }
 
-    AuthKeyToken authKeyToken = keyTokenService.createKeyToken(AuthUser.builder()
+    KeyToken keyToken = keyTokenService.createKeyToken(AuthUser.builder()
         .userId(existsUser.getId())
         .build());
 
     loginSessionRepository.save(LoginSessionCreate.builder()
         .user(existsUser)
-        .publicKey(authKeyToken.getPublicKey())
-        .jti(authKeyToken.getJti())
+        .publicKey(keyToken.getPublicKey())
+        .jti(keyToken.getJti())
         .ipAddress(clientIp)
         .userAgent(userAgent)
-        .expiresAt(authKeyToken.getExpiresAt())
+        .expiresAt(keyToken.getExpiresAt())
         .build());
 
     return LoginResponse.builder()
         .userId(existsUser.getId())
-        .accessToken(authKeyToken.getAccessToken())
-        .refreshToken(authKeyToken.getRefreshToken())
+        .accessToken(keyToken.getAccessToken())
+        .refreshToken(keyToken.getRefreshToken())
         .build();
   }
 

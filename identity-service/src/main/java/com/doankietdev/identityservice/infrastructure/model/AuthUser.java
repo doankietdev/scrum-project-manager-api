@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.application.model.dto;
+package com.doankietdev.identityservice.infrastructure.model;
 
 import lombok.AccessLevel;
 import lombok.Builder;

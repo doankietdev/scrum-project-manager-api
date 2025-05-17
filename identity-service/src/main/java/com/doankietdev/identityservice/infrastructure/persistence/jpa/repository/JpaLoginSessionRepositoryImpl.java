@@ -79,4 +79,9 @@ public class JpaLoginSessionRepositoryImpl implements LoginSessionRepository {
       return false;
     }
   }
+
+  @Override
+  public LoginSession findByUserIdAndJti(String userId, String jti) {
+    return loginSessionMapper.toDomain(loginSessionJpaRepository.findByUserIdAndJti(userId, jti));
+  }
 }

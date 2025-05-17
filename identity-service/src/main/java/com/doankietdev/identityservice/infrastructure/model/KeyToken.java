@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.application.model.dto;
+package com.doankietdev.identityservice.infrastructure.model;
 
 import java.time.Instant;
 
@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthKeyToken {
+public class KeyToken {
   byte[] publicKey;
   String jti;
   Instant expiresAt;

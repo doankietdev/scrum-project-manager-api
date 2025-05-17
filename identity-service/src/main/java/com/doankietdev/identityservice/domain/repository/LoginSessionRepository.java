@@ -8,5 +8,5 @@ import com.doankietdev.identityservice.domain.model.entity.LoginSession;
 
 @Repository
 public interface LoginSessionRepository extends BaseRepository<LoginSession, LoginSessionCreate, LoginSessionUpdate> {
-
+  LoginSession findByUserIdAndJti(String userId, String jti);
 }

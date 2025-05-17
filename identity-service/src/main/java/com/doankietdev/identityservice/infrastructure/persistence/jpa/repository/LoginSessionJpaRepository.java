@@ -15,4 +15,6 @@ public interface LoginSessionJpaRepository extends JpaRepository<LoginSessionEnt
   @Modifying(flushAutomatically = true)
   @Query(value = "UPDATE LoginSessionEntity l SET l.deletedAt = NULL WHERE l.id = :id")
   void restoreById(@Param("id") String id);
+
+  LoginSessionEntity findByUserIdAndJti(String userId, String jti);
 }
