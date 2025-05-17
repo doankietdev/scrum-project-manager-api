@@ -8,6 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.doankietdev.identityservice.application.exception.AppException;
+import com.doankietdev.identityservice.application.model.dto.AuthUser;
+import com.doankietdev.identityservice.application.model.dto.KeyToken;
 import com.doankietdev.identityservice.application.model.dto.request.AccountVerifyRequest;
 import com.doankietdev.identityservice.application.model.dto.request.LoginRequest;
 import com.doankietdev.identityservice.application.model.dto.request.RegisterRequest;
@@ -15,7 +17,8 @@ import com.doankietdev.identityservice.application.model.dto.response.AccountVer
 import com.doankietdev.identityservice.application.model.dto.response.LoginResponse;
 import com.doankietdev.identityservice.application.model.dto.response.RegisterResponse;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
-import com.doankietdev.identityservice.application.service.auth.AuthAppService;
+import com.doankietdev.identityservice.application.service.auth.AuthService;
+import com.doankietdev.identityservice.application.spi.KeyTokenService;
 import com.doankietdev.identityservice.domain.model.dto.LoginSessionCreate;
 import com.doankietdev.identityservice.domain.model.dto.OtpCreate;
 import com.doankietdev.identityservice.domain.model.dto.UserCreate;
@@ -29,9 +32,6 @@ import com.doankietdev.identityservice.domain.repository.LoginSessionRepository;
 import com.doankietdev.identityservice.domain.repository.OtpRepository;
 import com.doankietdev.identityservice.domain.repository.UserRepository;
 import com.doankietdev.identityservice.infrastructure.config.AuthProperties;
-import com.doankietdev.identityservice.infrastructure.model.AuthUser;
-import com.doankietdev.identityservice.infrastructure.model.KeyToken;
-import com.doankietdev.identityservice.infrastructure.security.KeyTokenInfrasService;
 
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -43,8 +43,8 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
 @Slf4j
-public class AuthAppServiceImpl implements AuthAppService {
-  KeyTokenInfrasService keyTokenService;
+public class AuthServiceImpl implements AuthService {
+  KeyTokenService keyTokenService;
   UserRepository userRepository;
   LoginSessionRepository loginSessionRepository;
   OtpRepository otpRepository;

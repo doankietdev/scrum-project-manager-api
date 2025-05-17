@@ -7,7 +7,7 @@ import com.doankietdev.identityservice.application.model.dto.response.AccountVer
 import com.doankietdev.identityservice.application.model.dto.response.LoginResponse;
 import com.doankietdev.identityservice.application.model.dto.response.RegisterResponse;
 
-public interface AuthAppService {
+public interface AuthService {
     public RegisterResponse register(RegisterRequest request);
     public AccountVerifyResponse verifyAccount(AccountVerifyRequest request);
     public LoginResponse login(LoginRequest request, String clientIp, String userAgent);

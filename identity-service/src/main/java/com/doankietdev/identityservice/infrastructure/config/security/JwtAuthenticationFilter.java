@@ -17,15 +17,15 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.doankietdev.identityservice.application.exception.AppException;
+import com.doankietdev.identityservice.application.model.dto.TokenPayload;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
+import com.doankietdev.identityservice.application.spi.KeyTokenService;
 import com.doankietdev.identityservice.domain.model.entity.LoginSession;
 import com.doankietdev.identityservice.domain.model.entity.User;
 import com.doankietdev.identityservice.domain.repository.LoginSessionRepository;
 import com.doankietdev.identityservice.domain.repository.UserRepository;
 import com.doankietdev.identityservice.infrastructure.model.Endpoint;
-import com.doankietdev.identityservice.infrastructure.model.TokenPayload;
 import com.doankietdev.identityservice.infrastructure.model.enums.RequestHeaderEnum;
-import com.doankietdev.identityservice.infrastructure.security.KeyTokenInfrasService;
 import com.doankietdev.identityservice.infrastructure.utils.ResponseUtil;
 
 import jakarta.servlet.FilterChain;
@@ -39,12 +39,12 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-  KeyTokenInfrasService keyTokenService;
+  KeyTokenService keyTokenService;
   LoginSessionRepository loginSessionRepository;
   UserRepository userRepository;
   RequestMatcher skipMatcher;
 
-  public JwtAuthenticationFilter(KeyTokenInfrasService keyTokenService,
+  public JwtAuthenticationFilter(KeyTokenService keyTokenService,
       LoginSessionRepository loginSessionRepository, UserRepository userRepository, Endpoint[] publicEndpoints) {
     this.keyTokenService = keyTokenService;
     this.loginSessionRepository = loginSessionRepository;

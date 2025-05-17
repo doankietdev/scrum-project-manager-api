@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.infrastructure.model;
+package com.doankietdev.identityservice.application.model.dto;
 
 import java.time.Instant;
 

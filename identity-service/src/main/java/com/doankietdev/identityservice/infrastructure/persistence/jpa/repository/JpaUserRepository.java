@@ -21,25 +21,25 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Repository
 @Slf4j
-public class JpaUserRepositoryImpl implements UserRepository {
-  UserJpaRepository userJpaRepository;
+public class JpaUserRepository implements UserRepository {
+  UserJpaStore userJpaStore;
   UserMapper userMapper;
 
   @Override
   public User findById(String id) {
-    return userMapper.toDomain(userJpaRepository.findById(id).orElse(null));
+    return userMapper.toDomain(userJpaStore.findById(id).orElse(null));
   }
 
   @Override
   public User save(UserCreate data) {
-    UserEntity userEntity = userJpaRepository.save(userMapper.createToEntity(data));
-    return userMapper.toDomain(userJpaRepository.findById(userEntity.getId())
+    UserEntity userEntity = userJpaStore.save(userMapper.createToEntity(data));
+    return userMapper.toDomain(userJpaStore.findById(userEntity.getId())
         .orElse(null));
   }
 
   @Override
   public User updateById(String id, UserUpdate updateData) {
-    UserEntity existsUserEntity = userJpaRepository.findById(id)
+    UserEntity existsUserEntity = userJpaStore.findById(id)
         .orElse(null);
     if (Objects.isNull(existsUserEntity)) {
       return null;
@@ -47,13 +47,13 @@ public class JpaUserRepositoryImpl implements UserRepository {
 
     BeanUtils.copyProperties(updateData, existsUserEntity);
 
-    return userMapper.toDomain(userJpaRepository.save(existsUserEntity));
+    return userMapper.toDomain(userJpaStore.save(existsUserEntity));
   }
 
   @Override
   public boolean deleteById(String id) {
     try {
-      userJpaRepository.deleteById(id);
+      userJpaStore.deleteById(id);
       return true;
     } catch (Exception e) {
       return false;
@@ -63,7 +63,7 @@ public class JpaUserRepositoryImpl implements UserRepository {
   @Override
   public boolean deletePermanentById(String id) {
     try {
-      userJpaRepository.deletePermanentById(id);
+      userJpaStore.deletePermanentById(id);
       return true;
     } catch (Exception e) {
       return false;
@@ -73,7 +73,7 @@ public class JpaUserRepositoryImpl implements UserRepository {
   @Override
   public boolean restoreById(String id) {
      try {
-      userJpaRepository.restoreById(id);
+      userJpaStore.restoreById(id);
       return true;
     } catch (Exception e) {
       return false;
@@ -82,7 +82,7 @@ public class JpaUserRepositoryImpl implements UserRepository {
 
   @Override
   public User findByIdentifier(String identifier) {
-    return userMapper.toDomain(userJpaRepository.findByIdentifier(identifier)
+    return userMapper.toDomain(userJpaStore.findByIdentifier(identifier)
         .orElse(null));
   }
 }

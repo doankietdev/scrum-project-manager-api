@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.doankietdev.identityservice.infrastructure.persistence.jpa.entity.LoginSessionEntity;
 
-public interface LoginSessionJpaRepository extends JpaRepository<LoginSessionEntity, String> {
+public interface LoginSessionJpaStore extends JpaRepository<LoginSessionEntity, String> {
   @Modifying(flushAutomatically = true)
   @Query(value = "DELETE FROM LoginSessionEntity l WHERE l.id = :id")
   void deletePermanentById(@Param("id") String id);

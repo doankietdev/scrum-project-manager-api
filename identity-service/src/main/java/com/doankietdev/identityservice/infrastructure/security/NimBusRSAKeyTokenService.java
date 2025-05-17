@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.infrastructure.security.impl;
+package com.doankietdev.identityservice.infrastructure.security;
 
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -17,12 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.doankietdev.identityservice.application.exception.AppException;
+import com.doankietdev.identityservice.application.model.dto.AuthUser;
+import com.doankietdev.identityservice.application.model.dto.KeyToken;
+import com.doankietdev.identityservice.application.model.dto.TokenPayload;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
+import com.doankietdev.identityservice.application.spi.KeyTokenService;
 import com.doankietdev.identityservice.infrastructure.config.AuthProperties;
-import com.doankietdev.identityservice.infrastructure.model.AuthUser;
-import com.doankietdev.identityservice.infrastructure.model.KeyToken;
-import com.doankietdev.identityservice.infrastructure.model.TokenPayload;
-import com.doankietdev.identityservice.infrastructure.security.KeyTokenInfrasService;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -37,7 +37,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
-public class KeyTokenInfrasServiceImpl implements KeyTokenInfrasService {
+public class NimBusRSAKeyTokenService implements KeyTokenService {
   @Autowired
   AuthProperties authProperties;
 

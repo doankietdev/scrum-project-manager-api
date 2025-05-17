@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.controller.http;
+package com.doankietdev.identityservice.presentation.controller;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -17,7 +17,7 @@ import com.doankietdev.identityservice.application.model.dto.response.AccountVer
 import com.doankietdev.identityservice.application.model.dto.response.AppResponse;
 import com.doankietdev.identityservice.application.model.dto.response.LoginResponse;
 import com.doankietdev.identityservice.application.model.dto.response.RegisterResponse;
-import com.doankietdev.identityservice.application.service.auth.AuthAppService;
+import com.doankietdev.identityservice.application.service.auth.AuthService;
 
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,12 +32,12 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class AuthController {
-  AuthAppService authAppService;
+  AuthService authService;
 
   @PostMapping("/register")
   public ResponseEntity<AppResponse<RegisterResponse>> register(@RequestBody RegisterRequest request) {
     AppResponse<RegisterResponse> response = AppResponse.<RegisterResponse>builder()
-        .data(authAppService.register(request))
+        .data(authService.register(request))
         .build();
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
@@ -45,7 +45,7 @@ public class AuthController {
   @PostMapping("/verify")
   public ResponseEntity<AppResponse<AccountVerifyResponse>> verifyAccount(@RequestBody AccountVerifyRequest request) {
     AppResponse<AccountVerifyResponse> response = AppResponse.<AccountVerifyResponse>builder()
-        .data(authAppService.verifyAccount(request))
+        .data(authService.verifyAccount(request))
         .build();
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
@@ -58,7 +58,7 @@ public class AuthController {
     String userAgent = httpServletRequest.getHeader("User-Agent");
 
     AppResponse<LoginResponse> response = AppResponse.<LoginResponse>builder()
-        .data(authAppService.login(request, clientIp, userAgent))
+        .data(authService.login(request, clientIp, userAgent))
         .build();
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }

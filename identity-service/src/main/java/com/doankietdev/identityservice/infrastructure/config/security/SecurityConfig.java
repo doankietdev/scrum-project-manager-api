@@ -17,10 +17,10 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import com.doankietdev.identityservice.application.spi.KeyTokenService;
 import com.doankietdev.identityservice.domain.repository.LoginSessionRepository;
 import com.doankietdev.identityservice.domain.repository.UserRepository;
 import com.doankietdev.identityservice.infrastructure.model.Endpoint;
-import com.doankietdev.identityservice.infrastructure.security.KeyTokenInfrasService;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -44,7 +44,7 @@ public class SecurityConfig {
   AccessDeniedHandler accessDeniedHandler;
 
   @Autowired
-  KeyTokenInfrasService keyTokenService;
+  KeyTokenService keyTokenService;
 
   @Autowired
   LoginSessionRepository loginSessionRepository;

@@ -21,25 +21,25 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Repository
 @Slf4j
-public class JpaLoginSessionRepositoryImpl implements LoginSessionRepository {
-  LoginSessionJpaRepository loginSessionJpaRepository;
+public class JpaLoginSessionRepository implements LoginSessionRepository {
+  LoginSessionJpaStore loginSessionJpaStore;
   LoginSessionMapper loginSessionMapper;
 
   @Override
   public LoginSession findById(String id) {
-    return loginSessionMapper.toDomain(loginSessionJpaRepository.findById(id).orElse(null));
+    return loginSessionMapper.toDomain(loginSessionJpaStore.findById(id).orElse(null));
   }
 
   @Override
   public LoginSession save(LoginSessionCreate data) {
-    LoginSessionEntity loginSessionEntity = loginSessionJpaRepository.save(loginSessionMapper.createToEntity(data));
-    return loginSessionMapper.toDomain(loginSessionJpaRepository.findById(loginSessionEntity.getId())
+    LoginSessionEntity loginSessionEntity = loginSessionJpaStore.save(loginSessionMapper.createToEntity(data));
+    return loginSessionMapper.toDomain(loginSessionJpaStore.findById(loginSessionEntity.getId())
         .orElse(null));
   }
 
   @Override
   public LoginSession updateById(String id, LoginSessionUpdate updateData) {
-    LoginSessionEntity existsLoginSessionEntity = loginSessionJpaRepository.findById(id)
+    LoginSessionEntity existsLoginSessionEntity = loginSessionJpaStore.findById(id)
         .orElse(null);
     if (Objects.isNull(existsLoginSessionEntity)) {
       return null;
@@ -47,13 +47,13 @@ public class JpaLoginSessionRepositoryImpl implements LoginSessionRepository {
 
     BeanUtils.copyProperties(updateData, existsLoginSessionEntity);
 
-    return loginSessionMapper.toDomain(loginSessionJpaRepository.save(existsLoginSessionEntity));
+    return loginSessionMapper.toDomain(loginSessionJpaStore.save(existsLoginSessionEntity));
   }
 
   @Override
   public boolean deleteById(String id) {
     try {
-      loginSessionJpaRepository.deleteById(id);
+      loginSessionJpaStore.deleteById(id);
       return true;
     } catch (Exception e) {
       return false;
@@ -63,7 +63,7 @@ public class JpaLoginSessionRepositoryImpl implements LoginSessionRepository {
   @Override
   public boolean deletePermanentById(String id) {
     try {
-      loginSessionJpaRepository.deletePermanentById(id);
+      loginSessionJpaStore.deletePermanentById(id);
       return true;
     } catch (Exception e) {
       return false;
@@ -73,7 +73,7 @@ public class JpaLoginSessionRepositoryImpl implements LoginSessionRepository {
   @Override
   public boolean restoreById(String id) {
     try {
-      loginSessionJpaRepository.restoreById(id);
+      loginSessionJpaStore.restoreById(id);
       return true;
     } catch (Exception e) {
       return false;
@@ -82,6 +82,6 @@ public class JpaLoginSessionRepositoryImpl implements LoginSessionRepository {
 
   @Override
   public LoginSession findByUserIdAndJti(String userId, String jti) {
-    return loginSessionMapper.toDomain(loginSessionJpaRepository.findByUserIdAndJti(userId, jti));
+    return loginSessionMapper.toDomain(loginSessionJpaStore.findByUserIdAndJti(userId, jti));
   }
 }

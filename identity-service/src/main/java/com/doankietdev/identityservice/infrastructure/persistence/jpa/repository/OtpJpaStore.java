@@ -7,16 +7,17 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.doankietdev.identityservice.infrastructure.persistence.jpa.entity.UserEntity;
+import com.doankietdev.identityservice.domain.model.enums.OtpType;
+import com.doankietdev.identityservice.infrastructure.persistence.jpa.entity.OtpEntity;
 
-public interface UserJpaRepository extends JpaRepository<UserEntity, String> {
-  Optional<UserEntity> findByIdentifier(String identifier);
+public interface OtpJpaStore extends JpaRepository<OtpEntity, String> {
+  Optional<OtpEntity> findByUserIdAndCodeAndType(String userId, String code, OtpType type);
 
   @Modifying(flushAutomatically = true)
-  @Query(value = "DELETE FROM UserEntity u WHERE u.id = :id")
+  @Query(value = "DELETE FROM OtpEntity l WHERE l.id = :id")
   void deletePermanentById(@Param("id") String id);
-
+  
   @Modifying(flushAutomatically = true)
-  @Query(value = "UPDATE UserEntity u SET u.deletedAt = NULL WHERE u.id = :id")
+  @Query(value = "UPDATE OtpEntity o SET o.deletedAt = NULL WHERE o.id = :id")
   void restoreById(@Param("id") String id);
 }
