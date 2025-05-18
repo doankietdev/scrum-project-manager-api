@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service;
 import com.doankietdev.identityservice.application.exception.AppException;
 import com.doankietdev.identityservice.application.model.cache.LoginSessionCache;
 import com.doankietdev.identityservice.application.model.dto.KeyToken;
+import com.doankietdev.identityservice.application.model.dto.LoginCommand;
+import com.doankietdev.identityservice.application.model.dto.LoginResult;
+import com.doankietdev.identityservice.application.model.dto.RegisterCommand;
+import com.doankietdev.identityservice.application.model.dto.RegisterResult;
 import com.doankietdev.identityservice.application.model.dto.TokenPayload;
-import com.doankietdev.identityservice.application.model.dto.request.AccountVerifyRequest;
-import com.doankietdev.identityservice.application.model.dto.request.LoginRequest;
-import com.doankietdev.identityservice.application.model.dto.request.RegisterRequest;
-import com.doankietdev.identityservice.application.model.dto.response.AccountVerifyResponse;
-import com.doankietdev.identityservice.application.model.dto.response.LoginResponse;
-import com.doankietdev.identityservice.application.model.dto.response.RegisterResponse;
+import com.doankietdev.identityservice.application.model.dto.VerifyAccountCommand;
+import com.doankietdev.identityservice.application.model.dto.VerifyAccountResult;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
 import com.doankietdev.identityservice.application.service.auth.AuthService;
 import com.doankietdev.identityservice.application.service.auth.cache.LoginSessionCacheService;
@@ -58,8 +58,8 @@ public class AuthServiceImpl implements AuthService {
 
   @Transactional
   @Override
-  public RegisterResponse register(RegisterRequest request) {
-    User existingUser = userRepository.findByIdentifier(request.getIdentifier());
+  public RegisterResult register(RegisterCommand command) {
+    User existingUser = userRepository.findByIdentifier(command.getIdentifier());
     if (Objects.nonNull(existingUser)) {
       throw AppException.builder()
           .appCode(AppCode.USER_ALREADY_EXISTS)
@@ -67,8 +67,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     User newUser = userRepository.save(UserCreate.builder()
-        .identifier(request.getIdentifier())
-        .password(passwordEncoder.encode(request.getPassword()))
+        .identifier(command.getIdentifier())
+        .password(passwordEncoder.encode(command.getPassword()))
         .identityType(IdentityType.EMAIL)
         .status(UserStatus.PENDING)
         .build());
@@ -95,15 +95,15 @@ public class AuthServiceImpl implements AuthService {
           .build();
     }
 
-    return RegisterResponse.builder()
+    return RegisterResult.builder()
         .identifier(newUser.getIdentifier())
         .build();
   }
 
   @Transactional
   @Override
-  public AccountVerifyResponse verifyAccount(AccountVerifyRequest request) {
-    User existsUser = userRepository.findByIdentifier(request.getIdentifier());
+  public VerifyAccountResult verifyAccount(VerifyAccountCommand command) {
+    User existsUser = userRepository.findByIdentifier(command.getIdentifier());
     if (Objects.isNull(existsUser)) {
       throw AppException.builder()
           .appCode(AppCode.USER_NOT_FOUND)
@@ -116,7 +116,7 @@ public class AuthServiceImpl implements AuthService {
           .build();
     }
 
-    Otp existsOtp = otpRepository.findByUserIdAndCodeAndType(existsUser.getId(), request.getOtp(),
+    Otp existsOtp = otpRepository.findByUserIdAndCodeAndType(existsUser.getId(), command.getOtp(),
         OtpType.EMAIL_VERIFICATION);
     if (Objects.isNull(existsOtp)) {
       throw AppException.builder()
@@ -154,20 +154,20 @@ public class AuthServiceImpl implements AuthService {
           .build();
     }
 
-    return AccountVerifyResponse.builder()
+    return VerifyAccountResult.builder()
         .identifier(existsUser.getIdentifier())
         .build();
   }
 
   @Transactional
   @Override
-  public LoginResponse login(LoginRequest request, String clientIp, String userAgent) {
-    User existsUser = userRepository.findByIdentifier(request.getIdentifier());
+  public LoginResult login(LoginCommand command, String clientIp, String userAgent) {
+    User existsUser = userRepository.findByIdentifier(command.getIdentifier());
 
     if (Objects.isNull(existsUser)) {
       throw AppException.builder()
           .appCode(AppCode.CredentialIncorrect)
-          .logMessage(String.format("Login attempt failed: User not found - %s", request.getIdentifier()))
+          .logMessage(String.format("Login attempt failed: User not found - %s", command.getIdentifier()))
           .build();
     }
 
@@ -183,7 +183,7 @@ public class AuthServiceImpl implements AuthService {
           .build();
     }
 
-    boolean isPasswordMatch = passwordEncoder.matches(request.getPassword(), existsUser.getPassword());
+    boolean isPasswordMatch = passwordEncoder.matches(command.getPassword(), existsUser.getPassword());
     if (!isPasswordMatch) {
       throw AppException.builder()
           .appCode(AppCode.CredentialIncorrect)
@@ -215,7 +215,7 @@ public class AuthServiceImpl implements AuthService {
         .publicKey(loginSession.getPublicKey())
         .build());
 
-    return LoginResponse.builder()
+    return LoginResult.builder()
         .accessToken(keyToken.getAccessToken())
         .refreshToken(keyToken.getRefreshToken())
         .build();

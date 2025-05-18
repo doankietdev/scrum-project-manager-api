@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.infrastructure.config;
+package com.doankietdev.identityservice.infrastructure.config.redis;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.ParserConfig;
-import com.doankietdev.identityservice.infrastructure.utils.FastJsonRedisDataSerializer;
+import com.doankietdev.identityservice.infrastructure.config.AppProperties;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import lombok.AccessLevel;

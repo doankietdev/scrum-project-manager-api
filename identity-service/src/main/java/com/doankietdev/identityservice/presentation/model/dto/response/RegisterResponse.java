@@ -1,4 +1,5 @@
-package com.doankietdev.identityservice.application.model;
+package com.doankietdev.identityservice.presentation.model.dto.response;
+
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -8,6 +9,6 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthUser {
-  String id;
+public class RegisterResponse {
+  String identifier;
 }

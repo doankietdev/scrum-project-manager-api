@@ -7,23 +7,23 @@ import org.springframework.util.StringUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-public class IpUtils {
+public class HttpRequestUtils {
 
     private static final String LOCALHOST_IPV4 = "127.0.0.1";
     private static final String LOCALHOST_IPV6 = "0:0:0:0:0:0:0:1";
 
-    public static String getClientIp(HttpServletRequest request) {
-        String ipAddress = request.getHeader("X-Forwarded-For");
+    public static String getClientIp(HttpServletRequest httpServletRequest) {
+        String ipAddress = httpServletRequest.getHeader("X-Forwarded-For");
         if (!StringUtils.hasText(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = request.getHeader("Proxy-Client-IP");
+            ipAddress = httpServletRequest.getHeader("Proxy-Client-IP");
         }
 
         if (!StringUtils.hasText(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = request.getHeader("WL-Proxy-Client-IP");
+            ipAddress = httpServletRequest.getHeader("WL-Proxy-Client-IP");
         }
 
         if (!StringUtils.hasText(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = request.getRemoteAddr();
+            ipAddress = httpServletRequest.getRemoteAddr();
             if (LOCALHOST_IPV4.equals(ipAddress) || LOCALHOST_IPV6.equals(ipAddress)) {
                 try {
                     InetAddress inetAddress = InetAddress.getLocalHost();
@@ -40,5 +40,9 @@ public class IpUtils {
         }
 
         return ipAddress;
+    }
+
+    public static String getUserAgent(HttpServletRequest httpServletRequest) {
+        return httpServletRequest.getHeader("User-Agent");
     }
 }

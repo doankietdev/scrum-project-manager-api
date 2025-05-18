@@ -1,4 +1,5 @@
-package com.doankietdev.identityservice.application.model.dto.request;
+package com.doankietdev.identityservice.application.model.dto;
+
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -8,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LoginRequest {
-  String identifier;
-  String password;
+public class LoginResult {
+  String accessToken;
+  String refreshToken;
 }

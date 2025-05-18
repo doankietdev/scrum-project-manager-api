@@ -17,17 +17,16 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.doankietdev.identityservice.application.exception.AppException;
-import com.doankietdev.identityservice.application.model.AuthDetails;
-import com.doankietdev.identityservice.application.model.AuthUser;
 import com.doankietdev.identityservice.application.model.cache.LoginSessionCache;
 import com.doankietdev.identityservice.application.model.dto.TokenPayload;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
 import com.doankietdev.identityservice.application.service.auth.cache.LoginSessionCacheService;
 import com.doankietdev.identityservice.application.spi.KeyTokenService;
 import com.doankietdev.identityservice.infrastructure.model.Endpoint;
-import com.doankietdev.identityservice.infrastructure.model.enums.RequestHeaderEnum;
-import com.doankietdev.identityservice.infrastructure.utils.ResponseUtil;
-import com.doankietdev.identityservice.shared.utils.IpUtils;
+import com.doankietdev.identityservice.infrastructure.model.auth.AuthDetails;
+import com.doankietdev.identityservice.infrastructure.model.auth.AuthUser;
+import com.doankietdev.identityservice.shared.utils.HttpRequestUtils;
+import com.doankietdev.identityservice.shared.utils.ResponseUtil;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -65,7 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       HttpServletRequest request,
       HttpServletResponse response,
       FilterChain filterChain) throws IOException, ServletException {
-    String authHeader = request.getHeader(RequestHeaderEnum.AUTHORIZATION_HEADER.getValue());
+    String authHeader = request.getHeader("Authorization");
     String authToken = extractTokenFromAuthHeader(authHeader);
 
     try {
@@ -115,7 +114,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     AuthUser principle = AuthUser.builder().id(tokenPayload.getUserId()).build();
-    AuthDetails details = AuthDetails.builder().clientIp(IpUtils.getClientIp(request)).build();
+    AuthDetails details = AuthDetails.builder().clientIp(HttpRequestUtils.getClientIp(request)).build();
     List<GrantedAuthority> authorities = new ArrayList<>();
     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
         principle,

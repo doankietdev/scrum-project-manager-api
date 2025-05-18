@@ -4,9 +4,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.doankietdev.identityservice.application.model.dto.response.ErrorResponse;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
 import com.doankietdev.identityservice.infrastructure.config.AppProperties;
+import com.doankietdev.identityservice.presentation.model.dto.response.ErrorResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

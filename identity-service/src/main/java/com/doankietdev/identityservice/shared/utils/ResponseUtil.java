@@ -1,11 +1,11 @@
-package com.doankietdev.identityservice.infrastructure.utils;
+package com.doankietdev.identityservice.shared.utils;
 
 import java.io.IOException;
 
 import org.springframework.http.MediaType;
 
-import com.doankietdev.identityservice.application.model.dto.response.AppResponse;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
+import com.doankietdev.identityservice.presentation.model.dto.response.AppResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.ServletOutputStream;

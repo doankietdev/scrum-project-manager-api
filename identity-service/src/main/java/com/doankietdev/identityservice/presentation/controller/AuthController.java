@@ -7,15 +7,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.doankietdev.identityservice.application.model.dto.request.AccountVerifyRequest;
-import com.doankietdev.identityservice.application.model.dto.request.LoginRequest;
-import com.doankietdev.identityservice.application.model.dto.request.RegisterRequest;
-import com.doankietdev.identityservice.application.model.dto.response.AccountVerifyResponse;
-import com.doankietdev.identityservice.application.model.dto.response.AppResponse;
-import com.doankietdev.identityservice.application.model.dto.response.LoginResponse;
-import com.doankietdev.identityservice.application.model.dto.response.RegisterResponse;
+import com.doankietdev.identityservice.application.model.dto.LoginResult;
+import com.doankietdev.identityservice.application.model.dto.RegisterResult;
+import com.doankietdev.identityservice.application.model.dto.VerifyAccountResult;
 import com.doankietdev.identityservice.application.service.auth.AuthService;
-import com.doankietdev.identityservice.shared.utils.IpUtils;
+import com.doankietdev.identityservice.presentation.mapper.AuthControllerMapper;
+import com.doankietdev.identityservice.presentation.model.dto.request.LoginRequest;
+import com.doankietdev.identityservice.presentation.model.dto.request.RegisterRequest;
+import com.doankietdev.identityservice.presentation.model.dto.request.VerifyAccountRequest;
+import com.doankietdev.identityservice.presentation.model.dto.response.AppResponse;
+import com.doankietdev.identityservice.presentation.model.dto.response.LoginResponse;
+import com.doankietdev.identityservice.presentation.model.dto.response.RegisterResponse;
+import com.doankietdev.identityservice.presentation.model.dto.response.VerifyAccountResponse;
+import com.doankietdev.identityservice.shared.utils.HttpRequestUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -30,33 +34,44 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AuthController {
   AuthService authService;
+  AuthControllerMapper authControllerMapper;
 
   @PostMapping("/register")
-  public ResponseEntity<AppResponse<RegisterResponse>> register(@RequestBody RegisterRequest request) {
+  public ResponseEntity<AppResponse> register(@RequestBody RegisterRequest request) {
+
+    RegisterResult result = authService.register(authControllerMapper.toRegisterCommand(request));
+
     AppResponse<RegisterResponse> response = AppResponse.<RegisterResponse>builder()
-        .data(authService.register(request))
+        .data(authControllerMapper.toRegisterResponse(result))
         .build();
+
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
   @PostMapping("/verify")
-  public ResponseEntity<AppResponse<AccountVerifyResponse>> verifyAccount(@RequestBody AccountVerifyRequest request) {
-    AppResponse<AccountVerifyResponse> response = AppResponse.<AccountVerifyResponse>builder()
-        .data(authService.verifyAccount(request))
+  public ResponseEntity<AppResponse> verifyAccount(@RequestBody VerifyAccountRequest request) {
+    VerifyAccountResult result = authService.verifyAccount(authControllerMapper.toVerifyAccountCommand(request));
+
+    AppResponse<VerifyAccountResponse> response = AppResponse.<VerifyAccountResponse>builder()
+        .data(authControllerMapper.toVerifyAccountResponse(result))
         .build();
+        
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 
   @PostMapping("/login")
-  public ResponseEntity<AppResponse<LoginResponse>> login(@RequestBody LoginRequest request,
+  public ResponseEntity<AppResponse> login(@RequestBody LoginRequest request,
       HttpServletRequest httpServletRequest) {
 
-    String clientIp = IpUtils.getClientIp(httpServletRequest);
-    String userAgent = httpServletRequest.getHeader("User-Agent");
+    String clientIp = HttpRequestUtils.getClientIp(httpServletRequest);
+    String userAgent = HttpRequestUtils.getUserAgent(httpServletRequest);
+
+    LoginResult result = authService.login(authControllerMapper.toLoginCommand(request), clientIp, userAgent);
 
     AppResponse<LoginResponse> response = AppResponse.<LoginResponse>builder()
-        .data(authService.login(request, clientIp, userAgent))
+        .data(authControllerMapper.toLoginResponse(result))
         .build();
+
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 }

@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.infrastructure.utils;
+package com.doankietdev.identityservice.infrastructure.config.redis;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

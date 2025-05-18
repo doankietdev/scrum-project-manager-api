@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.application.model.dto.response;
+package com.doankietdev.identityservice.application.model.dto;
 
 
 import lombok.AccessLevel;
@@ -9,6 +9,6 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AccountVerifyResponse {
+public class RegisterResult {
   String identifier;
 }

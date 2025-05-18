@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.doankietdev.identityservice.application.model.AuthUser;
 import com.doankietdev.identityservice.application.model.dto.GetMySessionsResult;
-import com.doankietdev.identityservice.application.model.dto.response.AppResponse;
 import com.doankietdev.identityservice.application.service.user.UserService;
+import com.doankietdev.identityservice.infrastructure.model.auth.AuthUser;
 import com.doankietdev.identityservice.presentation.mapper.UserControllerMapper;
+import com.doankietdev.identityservice.presentation.model.dto.response.AppResponse;
 import com.doankietdev.identityservice.presentation.model.dto.response.GetMySessionsResponse;
 
 import lombok.AccessLevel;

@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.application.model.dto.request;
+package com.doankietdev.identityservice.infrastructure.model.auth;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -8,7 +8,6 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AccountVerifyRequest {
-  String identifier;
-  String otp;
+public class AuthDetails {
+  String clientIp;
 }

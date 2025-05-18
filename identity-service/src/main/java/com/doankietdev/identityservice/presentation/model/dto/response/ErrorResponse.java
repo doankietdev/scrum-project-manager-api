@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.application.model.dto.response;
+package com.doankietdev.identityservice.presentation.model.dto.response;
 
 import com.doankietdev.identityservice.application.model.enums.AppCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -12,15 +12,17 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AppResponse<T> {
-    @Builder.Default
-    int code = AppCode.SUCCESS.getCode();
+public class ErrorResponse<T> {
+  @Builder.Default
+  int code = AppCode.SUCCESS.getCode();
 
-    @Builder.Default
-    String message = AppCode.SUCCESS.getMessage();
+  @Builder.Default
+  String message = AppCode.SUCCESS.getMessage();
 
-    @Builder.Default
-    long timestamp = System.currentTimeMillis();
+  String logMessage;
 
-    T data;
+  @Builder.Default
+  long timestamp = System.currentTimeMillis();
+
+  T details;
 }

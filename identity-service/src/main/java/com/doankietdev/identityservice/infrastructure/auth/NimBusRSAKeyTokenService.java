@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.infrastructure.security;
+package com.doankietdev.identityservice.infrastructure.auth;
 
 import java.security.KeyFactory;
 import java.security.KeyPair;

@@ -7,7 +7,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import com.doankietdev.identityservice.application.model.enums.AppCode;
-import com.doankietdev.identityservice.infrastructure.utils.ResponseUtil;
+import com.doankietdev.identityservice.shared.utils.ResponseUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
