@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.infrastructure.persistence.jpa.mapper;
+package com.doankietdev.identityservice.infrastructure.persistence.jpa.repository.mapper;
 
 import org.mapstruct.Mapper;
 

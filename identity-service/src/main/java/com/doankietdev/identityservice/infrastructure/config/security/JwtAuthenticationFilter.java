@@ -17,13 +17,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.doankietdev.identityservice.application.exception.AppException;
+import com.doankietdev.identityservice.application.model.cache.LoginSessionCache;
 import com.doankietdev.identityservice.application.model.dto.TokenPayload;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
+import com.doankietdev.identityservice.application.service.auth.cache.LoginSessionCacheService;
 import com.doankietdev.identityservice.application.spi.KeyTokenService;
-import com.doankietdev.identityservice.domain.model.entity.LoginSession;
-import com.doankietdev.identityservice.domain.model.entity.User;
-import com.doankietdev.identityservice.domain.repository.LoginSessionRepository;
-import com.doankietdev.identityservice.domain.repository.UserRepository;
 import com.doankietdev.identityservice.infrastructure.model.Endpoint;
 import com.doankietdev.identityservice.infrastructure.model.enums.RequestHeaderEnum;
 import com.doankietdev.identityservice.infrastructure.utils.ResponseUtil;
@@ -40,15 +38,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
   KeyTokenService keyTokenService;
-  LoginSessionRepository loginSessionRepository;
-  UserRepository userRepository;
+  LoginSessionCacheService loginSessionCacheService;
   RequestMatcher skipMatcher;
 
   public JwtAuthenticationFilter(KeyTokenService keyTokenService,
-      LoginSessionRepository loginSessionRepository, UserRepository userRepository, Endpoint[] publicEndpoints) {
+  LoginSessionCacheService loginSessionCacheService, Endpoint[] publicEndpoints) {
     this.keyTokenService = keyTokenService;
-    this.loginSessionRepository = loginSessionRepository;
-    this.userRepository = userRepository;
+    this.loginSessionCacheService = loginSessionCacheService;
 
     List<RequestMatcher> matchers = Arrays.stream(publicEndpoints)
         .map(ep -> new AntPathRequestMatcher(ep.getUrl(), ep.getMethod().name()))
@@ -99,29 +95,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       throw AppException.builder().appCode(AppCode.SERVER_ERROR).build();
     }
 
-    User user = userRepository.findById(parsedTokenPayload.getUserId());
-    if (Objects.isNull(user)) {
-      throw AppException.builder().appCode(AppCode.SERVER_ERROR).build();
+    LoginSessionCache loginSessionCache = loginSessionCacheService.get(parsedTokenPayload.getUserId(),
+    parsedTokenPayload.getJti());
+
+    if (Objects.isNull(loginSessionCache)) {
+      throw AppException.builder().appCode(AppCode.TOKEN_INVALID).build();
     }
 
-    LoginSession loginSession = loginSessionRepository.findByUserIdAndJti(
-        parsedTokenPayload.getUserId(),
-        parsedTokenPayload.getJti());
-    if (Objects.isNull(loginSession)) {
-      throw AppException.builder().appCode(AppCode.SERVER_ERROR).build();
-    }
-
-    TokenPayload tokenPayload = keyTokenService.verifyToken(authToken, loginSession.getPublicKey());
+    TokenPayload tokenPayload = keyTokenService.verifyToken(authToken, loginSessionCache.getPublicKey());
     if (Objects.isNull(tokenPayload)) {
       throw AppException.builder().appCode(AppCode.SERVER_ERROR).build();
     }
 
     List<GrantedAuthority> authorities = new ArrayList<>();
     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-        user.getIdentifier(),
+        tokenPayload.getIdentifier(),
         null,
         authorities);
-    authentication.setDetails(user);
+    authentication.setDetails(tokenPayload);
     return authentication;
   }
 

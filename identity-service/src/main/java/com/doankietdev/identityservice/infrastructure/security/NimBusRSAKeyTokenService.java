@@ -11,18 +11,15 @@ import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.Date;
-import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.doankietdev.identityservice.application.exception.AppException;
-import com.doankietdev.identityservice.application.model.dto.AuthUser;
 import com.doankietdev.identityservice.application.model.dto.KeyToken;
 import com.doankietdev.identityservice.application.model.dto.TokenPayload;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
 import com.doankietdev.identityservice.application.spi.KeyTokenService;
-import com.doankietdev.identityservice.infrastructure.config.AuthProperties;
+import com.doankietdev.identityservice.infrastructure.config.AppProperties;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -33,16 +30,20 @@ import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Component
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class NimBusRSAKeyTokenService implements KeyTokenService {
-  @Autowired
-  AuthProperties authProperties;
+  AppProperties appProperties;
 
   @Override
-  public KeyToken createKeyToken(AuthUser authUser) {
+  public KeyToken createKeyToken(TokenPayload payload) {
     KeyPair keyPair;
     try {
       keyPair = createKeyPair();
@@ -52,11 +53,9 @@ public class NimBusRSAKeyTokenService implements KeyTokenService {
     RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
     RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
 
-    String jti = UUID.randomUUID().toString();
-
-    JWTClaimsSet refreshJWTClaimsSet = getJWTClaimsSet(authUser, jti, authProperties.getRefreshTokenTime());
+    JWTClaimsSet refreshJWTClaimsSet = getJWTClaimsSet(payload, appProperties.getAuth().getRefreshTokenExpirationTime());
     SignedJWT signedAccessJWT = new SignedJWT(getJWSHeader(),
-        getJWTClaimsSet(authUser, jti, authProperties.getAccessTokenTime()));
+        getJWTClaimsSet(payload, appProperties.getAuth().getAccessTokenExpirationTime()));
     SignedJWT signedRefreshJWT = new SignedJWT(getJWSHeader(), refreshJWTClaimsSet);
 
     JWSSigner jwsSigner;
@@ -72,7 +71,7 @@ public class NimBusRSAKeyTokenService implements KeyTokenService {
         .accessToken(signedAccessJWT.serialize())
         .refreshToken(signedRefreshJWT.serialize())
         .publicKey(publicKey.getEncoded())
-        .jti(jti)
+        .jti(payload.getJti())
         .expiresAt(refreshJWTClaimsSet.getExpirationTime().toInstant())
         .build();
   }
@@ -158,14 +157,15 @@ public class NimBusRSAKeyTokenService implements KeyTokenService {
     return new JWSHeader(JWSAlgorithm.RS256);
   }
 
-  private JWTClaimsSet getJWTClaimsSet(AuthUser authUser, String jti, long expirationTime) {
+  private JWTClaimsSet getJWTClaimsSet(TokenPayload payload, long expirationTime) {
     Instant now = Instant.now();
     return new JWTClaimsSet.Builder()
-        .subject(authUser.getUserId())
-        .issuer("http://localhost:8080")
+        .subject(payload.getUserId())
+        // .issuer("http://localhost:8080")
         .issueTime(Date.from(now))
         .expirationTime(Date.from(now.plusSeconds(expirationTime)))
-        .jwtID(jti)
+        .jwtID(payload.getJti())
+        .claim("identifier", payload.getIdentifier())
         .build();
   }
 }

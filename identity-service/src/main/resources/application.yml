@@ -45,7 +45,9 @@ management:
 
 app:
   auth:
-    email-verification-otp-time: 300 # seconds
+    email-verification-otp-expiration-time: 300 # seconds
     email-verification-otp-length: 6
-    access-token-time: 3600 # seconds
-    refresh-token-time: 604800 # seconds
+    access-token-expiration-time: 3600 # seconds
+    refresh-token-expiration-time: 604800 # seconds
+  cache:
+    expiration-time: 7200 # seconds

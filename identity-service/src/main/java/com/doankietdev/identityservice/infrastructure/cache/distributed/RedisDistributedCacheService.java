@@ -28,22 +28,32 @@ public class RedisDistributedCacheService implements DistributedCacheService {
   }
 
   @Override
-  public void put(Object key, Object value) {
-    redisTemplate.opsForValue().set(key, value);
+  public Boolean put(Object key, Object value) {
+    try {
+      redisTemplate.opsForValue().set(key, value);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   @Override
-  public void put(Object key, Object value, Long exp) {
-    put(key, value, exp, TimeUnit.SECONDS);
+  public Boolean put(Object key, Object value, Long exp) {
+    return put(key, value, exp, TimeUnit.SECONDS);
   }
 
   @Override
-  public void put(Object key, Object value, Long exp, TimeUnit timeUnit) {
-    redisTemplate.opsForValue().set(key, value, exp, timeUnit);
+  public Boolean put(Object key, Object value, Long exp, TimeUnit timeUnit) {
+    try {
+      redisTemplate.opsForValue().set(key, value, exp, timeUnit);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   @Override
-  public boolean hasKey(Object key) {
+  public Boolean hasKey(Object key) {
     return this.redisTemplate.opsForValue().get(key) != null;
   }
 

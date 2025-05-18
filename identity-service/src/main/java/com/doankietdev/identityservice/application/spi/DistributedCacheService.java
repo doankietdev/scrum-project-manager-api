@@ -20,7 +20,7 @@ public interface DistributedCacheService<T> {
    * @param key   Cache key
    * @param value Cache value
    */
-  void put(Object key, T value);
+  Boolean put(Object key, T value);
 
   /**
    * Store an item in the cache with an expiration time in seconds.
@@ -29,7 +29,7 @@ public interface DistributedCacheService<T> {
    * @param value Cache value
    * @param exp   Expiration time in seconds
    */
-  void put(Object key, T value, Long exp);
+  Boolean put(Object key, T value, Long exp);
 
   /**
    * Store an item in the cache with an expiration time and time unit.
@@ -39,7 +39,7 @@ public interface DistributedCacheService<T> {
    * @param exp      Expiration time
    * @param timeUnit Time unit for the expiration time
    */
-  void put(Object key, T value, Long exp, TimeUnit timeUnit);
+  Boolean put(Object key, T value, Long exp, TimeUnit timeUnit);
 
   /**
    * Check if the cache contains the given key.
@@ -47,7 +47,7 @@ public interface DistributedCacheService<T> {
    * @param key Cache key
    * @return True if the key exists, False otherwise
    */
-  boolean hasKey(Object key);
+  Boolean hasKey(Object key);
 
   /**
    * Remove an item from the cache.

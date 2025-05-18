@@ -56,7 +56,7 @@ public class RedisConfig extends CachingConfigurerSupport {
   static final String REDIS_URI_PREFIX = "redis://";
 
   @Autowired
-  CacheProperties cacheProperties;
+  AppProperties appProperties;
 
   /**
    * Khi có nhiều quản lý, bắt buộc phải sử dụng chú thích này trên một quản lý:
@@ -73,10 +73,10 @@ public class RedisConfig extends CachingConfigurerSupport {
     RedisSerializationContext.SerializationPair<Object> pair = RedisSerializationContext.SerializationPair
         .fromSerializer(fastJsonRedisSerializer);
     RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig().serializeValuesWith(pair);
-    defaultCacheConfig = defaultCacheConfig.entryTtl(Duration.ofSeconds(cacheProperties.getTimeout()));
+    defaultCacheConfig = defaultCacheConfig.entryTtl(Duration.ofSeconds(appProperties.getCache().getExpirationTime()));
     RedisCacheManager cacheManager = new RedisCacheManager(redisCacheWriter, defaultCacheConfig);
 
-    ParserConfig.getGlobalInstance().addAccept("com.myshop.");
+    ParserConfig.getGlobalInstance().addAccept("com.doankietdev.");
 
     return cacheManager;
   }

@@ -3,13 +3,15 @@ package com.doankietdev.identityservice.application.service.auth.impl;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Random;
+import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.doankietdev.identityservice.application.exception.AppException;
-import com.doankietdev.identityservice.application.model.dto.AuthUser;
+import com.doankietdev.identityservice.application.model.cache.LoginSessionCache;
 import com.doankietdev.identityservice.application.model.dto.KeyToken;
+import com.doankietdev.identityservice.application.model.dto.TokenPayload;
 import com.doankietdev.identityservice.application.model.dto.request.AccountVerifyRequest;
 import com.doankietdev.identityservice.application.model.dto.request.LoginRequest;
 import com.doankietdev.identityservice.application.model.dto.request.RegisterRequest;
@@ -18,11 +20,13 @@ import com.doankietdev.identityservice.application.model.dto.response.LoginRespo
 import com.doankietdev.identityservice.application.model.dto.response.RegisterResponse;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
 import com.doankietdev.identityservice.application.service.auth.AuthService;
+import com.doankietdev.identityservice.application.service.auth.cache.LoginSessionCacheService;
 import com.doankietdev.identityservice.application.spi.KeyTokenService;
 import com.doankietdev.identityservice.domain.model.dto.LoginSessionCreate;
 import com.doankietdev.identityservice.domain.model.dto.OtpCreate;
 import com.doankietdev.identityservice.domain.model.dto.UserCreate;
 import com.doankietdev.identityservice.domain.model.dto.UserUpdate;
+import com.doankietdev.identityservice.domain.model.entity.LoginSession;
 import com.doankietdev.identityservice.domain.model.entity.Otp;
 import com.doankietdev.identityservice.domain.model.entity.User;
 import com.doankietdev.identityservice.domain.model.enums.IdentityType;
@@ -31,7 +35,7 @@ import com.doankietdev.identityservice.domain.model.enums.UserStatus;
 import com.doankietdev.identityservice.domain.repository.LoginSessionRepository;
 import com.doankietdev.identityservice.domain.repository.OtpRepository;
 import com.doankietdev.identityservice.domain.repository.UserRepository;
-import com.doankietdev.identityservice.infrastructure.config.AuthProperties;
+import com.doankietdev.identityservice.infrastructure.config.AppProperties;
 
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -49,7 +53,8 @@ public class AuthServiceImpl implements AuthService {
   LoginSessionRepository loginSessionRepository;
   OtpRepository otpRepository;
   PasswordEncoder passwordEncoder;
-  AuthProperties authProperties;
+  AppProperties appProperties;
+  LoginSessionCacheService loginSessionCacheService;
 
   @Transactional
   @Override
@@ -78,9 +83,9 @@ public class AuthServiceImpl implements AuthService {
     Otp newOtp = otpRepository.save(
         OtpCreate.builder()
             .user(newUser)
-            .code(createRandomOtp(authProperties.getEmailVerificationOtpLength()))
+            .code(createRandomOtp(appProperties.getAuth().getEmailVerificationOtpLength()))
             .type(OtpType.EMAIL_VERIFICATION)
-            .expiresAt(Instant.now().plusSeconds(authProperties.getEmailVerificationOtpTime()))
+            .expiresAt(Instant.now().plusSeconds(appProperties.getAuth().getEmailVerificationOtpExpirationTime()))
             .build());
 
     if (Objects.isNull(newOtp)) {
@@ -111,7 +116,8 @@ public class AuthServiceImpl implements AuthService {
           .build();
     }
 
-    Otp existsOtp = otpRepository.findByUserIdAndCodeAndType(existsUser.getId(), request.getOtp(), OtpType.EMAIL_VERIFICATION);
+    Otp existsOtp = otpRepository.findByUserIdAndCodeAndType(existsUser.getId(), request.getOtp(),
+        OtpType.EMAIL_VERIFICATION);
     if (Objects.isNull(existsOtp)) {
       throw AppException.builder()
           .appCode(AppCode.OTP_INVALID)
@@ -153,6 +159,7 @@ public class AuthServiceImpl implements AuthService {
         .build();
   }
 
+  @Transactional
   @Override
   public LoginResponse login(LoginRequest request, String clientIp, String userAgent) {
     User existsUser = userRepository.findByIdentifier(request.getIdentifier());
@@ -184,11 +191,13 @@ public class AuthServiceImpl implements AuthService {
           .build();
     }
 
-    KeyToken keyToken = keyTokenService.createKeyToken(AuthUser.builder()
+    KeyToken keyToken = keyTokenService.createKeyToken(TokenPayload.builder()
         .userId(existsUser.getId())
+        .jti(UUID.randomUUID().toString())
+        .identifier(existsUser.getIdentifier())
         .build());
 
-    loginSessionRepository.save(LoginSessionCreate.builder()
+    LoginSession loginSession = loginSessionRepository.save(LoginSessionCreate.builder()
         .user(existsUser)
         .publicKey(keyToken.getPublicKey())
         .jti(keyToken.getJti())
@@ -197,8 +206,16 @@ public class AuthServiceImpl implements AuthService {
         .expiresAt(keyToken.getExpiresAt())
         .build());
 
+    String userId = loginSession.getUser().getId();
+    String jti = loginSession.getJti();
+
+    loginSessionCacheService.put(userId, jti, LoginSessionCache.builder()
+        .userId(userId)
+        .jti(jti)
+        .publicKey(loginSession.getPublicKey())
+        .build());
+
     return LoginResponse.builder()
-        .userId(existsUser.getId())
         .accessToken(keyToken.getAccessToken())
         .refreshToken(keyToken.getRefreshToken())
         .build();

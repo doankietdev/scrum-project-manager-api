@@ -10,7 +10,7 @@ import com.doankietdev.identityservice.domain.model.dto.UserUpdate;
 import com.doankietdev.identityservice.domain.model.entity.User;
 import com.doankietdev.identityservice.domain.repository.UserRepository;
 import com.doankietdev.identityservice.infrastructure.persistence.jpa.entity.UserEntity;
-import com.doankietdev.identityservice.infrastructure.persistence.jpa.mapper.UserMapper;
+import com.doankietdev.identityservice.infrastructure.persistence.jpa.repository.mapper.UserMapper;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

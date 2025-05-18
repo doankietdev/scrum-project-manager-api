@@ -11,7 +11,7 @@ import com.doankietdev.identityservice.domain.model.entity.Otp;
 import com.doankietdev.identityservice.domain.model.enums.OtpType;
 import com.doankietdev.identityservice.domain.repository.OtpRepository;
 import com.doankietdev.identityservice.infrastructure.persistence.jpa.entity.OtpEntity;
-import com.doankietdev.identityservice.infrastructure.persistence.jpa.mapper.OtpMapper;
+import com.doankietdev.identityservice.infrastructure.persistence.jpa.repository.mapper.OtpMapper;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

@@ -11,4 +11,5 @@ import lombok.experimental.FieldDefaults;
 public class TokenPayload {
     String userId;
     String jti;
+    String identifier;
 }

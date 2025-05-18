@@ -10,7 +10,7 @@ import com.doankietdev.identityservice.domain.model.dto.LoginSessionUpdate;
 import com.doankietdev.identityservice.domain.model.entity.LoginSession;
 import com.doankietdev.identityservice.domain.repository.LoginSessionRepository;
 import com.doankietdev.identityservice.infrastructure.persistence.jpa.entity.LoginSessionEntity;
-import com.doankietdev.identityservice.infrastructure.persistence.jpa.mapper.LoginSessionMapper;
+import com.doankietdev.identityservice.infrastructure.persistence.jpa.repository.mapper.LoginSessionMapper;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

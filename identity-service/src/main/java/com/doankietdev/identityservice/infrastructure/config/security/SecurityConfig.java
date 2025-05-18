@@ -17,9 +17,8 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import com.doankietdev.identityservice.application.service.auth.cache.LoginSessionCacheService;
 import com.doankietdev.identityservice.application.spi.KeyTokenService;
-import com.doankietdev.identityservice.domain.repository.LoginSessionRepository;
-import com.doankietdev.identityservice.domain.repository.UserRepository;
 import com.doankietdev.identityservice.infrastructure.model.Endpoint;
 
 import lombok.AccessLevel;
@@ -47,10 +46,7 @@ public class SecurityConfig {
   KeyTokenService keyTokenService;
 
   @Autowired
-  LoginSessionRepository loginSessionRepository;
-
-  @Autowired
-  UserRepository userRepository;
+  LoginSessionCacheService loginSessionCacheService;
 
   @Bean
   SecurityFilterChain securityFilterChain(
@@ -69,7 +65,7 @@ public class SecurityConfig {
             c -> c.authenticationEntryPoint(authenticationEntryPoint).accessDeniedHandler(accessDeniedHandler))
         .headers(c -> c.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
 
-    httpSecurity.addFilterBefore(new JwtAuthenticationFilter(keyTokenService, loginSessionRepository, userRepository, PUBLIC_ENDPOINTS),
+    httpSecurity.addFilterBefore(new JwtAuthenticationFilter(keyTokenService, loginSessionCacheService, PUBLIC_ENDPOINTS),
         UsernamePasswordAuthenticationFilter.class);
 
     return httpSecurity.build();

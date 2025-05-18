@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.doankietdev.identityservice.application.model.dto.response.ErrorResponse;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
-import com.doankietdev.identityservice.infrastructure.config.AppConfig;
+import com.doankietdev.identityservice.infrastructure.config.AppProperties;
 
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,15 +17,15 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class GlobalExceptionHandler {
-  AppConfig appConfig;
+  AppProperties appProperties;
 
   @ExceptionHandler(value = RuntimeException.class)
   ResponseEntity<ErrorResponse<?>> handleException(RuntimeException e) {
-    boolean isDev = appConfig.getEnvName().equals("dev");
+    boolean isDev = appProperties.getEnvName().equals("dev");
   
-    // if (isDev) {
-    //   log.error("Stack trace:", e);
-    // }
+    if (isDev) {
+      log.error("Stack trace:", e);
+    }
 
     AppCode appCode = AppCode.SERVER_ERROR;
 
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(value = AppException.class)
   ResponseEntity<ErrorResponse<?>> handleAppException(AppException e) {
-    boolean isDev = appConfig.getEnvName().equals("dev");
+    boolean isDev = appProperties.getEnvName().equals("dev");
 
     AppCode appCode = e.getAppCode();
 
