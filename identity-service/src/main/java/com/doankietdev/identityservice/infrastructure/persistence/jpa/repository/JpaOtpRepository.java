@@ -10,8 +10,8 @@ import com.doankietdev.identityservice.domain.model.dto.OtpUpdate;
 import com.doankietdev.identityservice.domain.model.entity.Otp;
 import com.doankietdev.identityservice.domain.model.enums.OtpType;
 import com.doankietdev.identityservice.domain.repository.OtpRepository;
+import com.doankietdev.identityservice.infrastructure.mapper.jpa.OtpJpaMapper;
 import com.doankietdev.identityservice.infrastructure.persistence.jpa.entity.OtpEntity;
-import com.doankietdev.identityservice.infrastructure.persistence.jpa.repository.mapper.OtpMapper;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +22,16 @@ import lombok.experimental.FieldDefaults;
 @Repository
 public class JpaOtpRepository implements OtpRepository {
   OtpJpaStore otpJpaStore;
-  OtpMapper otpMapper;
+  OtpJpaMapper otpJpaMapper;
 
   @Override
   public Otp findById(String id) {
-    return otpMapper.toDomain(otpJpaStore.findById(id).orElse(null));
+    return otpJpaMapper.toDomain(otpJpaStore.findById(id).orElse(null));
   }
 
   @Override
   public Otp save(OtpCreate data) {
-    return otpMapper.toDomain(otpJpaStore.save(otpMapper.createToEntity(data)));
+    return otpJpaMapper.toDomain(otpJpaStore.save(otpJpaMapper.createToEntity(data)));
   }
 
   @Override
@@ -44,7 +44,7 @@ public class JpaOtpRepository implements OtpRepository {
 
     BeanUtils.copyProperties(updateData, existsOtpEntity);
 
-    return otpMapper.toDomain(otpJpaStore.save(existsOtpEntity));
+    return otpJpaMapper.toDomain(otpJpaStore.save(existsOtpEntity));
   }
 
   @Override
@@ -79,7 +79,7 @@ public class JpaOtpRepository implements OtpRepository {
 
   @Override
   public Otp findByUserIdAndCodeAndType(String userId, String code, OtpType type) {
-    return otpMapper.toDomain(otpJpaStore.findByUserIdAndCodeAndType(userId, code, type)
+    return otpJpaMapper.toDomain(otpJpaStore.findByUserIdAndCodeAndType(userId, code, type)
         .orElse(null));
   }
 }

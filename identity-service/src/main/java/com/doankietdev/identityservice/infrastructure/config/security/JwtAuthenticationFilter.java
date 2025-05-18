@@ -17,6 +17,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.doankietdev.identityservice.application.exception.AppException;
+import com.doankietdev.identityservice.application.model.AuthDetails;
+import com.doankietdev.identityservice.application.model.AuthUser;
 import com.doankietdev.identityservice.application.model.cache.LoginSessionCache;
 import com.doankietdev.identityservice.application.model.dto.TokenPayload;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
@@ -25,6 +27,7 @@ import com.doankietdev.identityservice.application.spi.KeyTokenService;
 import com.doankietdev.identityservice.infrastructure.model.Endpoint;
 import com.doankietdev.identityservice.infrastructure.model.enums.RequestHeaderEnum;
 import com.doankietdev.identityservice.infrastructure.utils.ResponseUtil;
+import com.doankietdev.identityservice.shared.utils.IpUtils;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -66,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     String authToken = extractTokenFromAuthHeader(authHeader);
 
     try {
-      UsernamePasswordAuthenticationToken authentication = getAuthentication(authToken, response);
+      UsernamePasswordAuthenticationToken authentication = getAuthentication(request, response, authToken);
       if (Objects.isNull(authentication)) {
         return;
       }
@@ -75,8 +78,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       if (e instanceof AppException) {
         AppException appException = (AppException) e;
         ResponseUtil.output(response, appException.getAppCode());
+      } else {
+        e.printStackTrace();
+        ResponseUtil.output(response, AppCode.SERVER_ERROR);
       }
-      ResponseUtil.output(response, AppCode.SERVER_ERROR);
       return;
     }
     
@@ -84,8 +89,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
 
   private UsernamePasswordAuthenticationToken getAuthentication(
-      String authToken,
-      HttpServletResponse response) throws AppException {
+      HttpServletRequest request,
+      HttpServletResponse response,
+      String authToken
+      ) throws AppException {
     if (StringUtils.isEmpty(authToken)) {
       throw AppException.builder().appCode(AppCode.TOKEN_MISSING).build();
     }
@@ -107,12 +114,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       throw AppException.builder().appCode(AppCode.SERVER_ERROR).build();
     }
 
+    AuthUser principle = AuthUser.builder().id(tokenPayload.getUserId()).build();
+    AuthDetails details = AuthDetails.builder().clientIp(IpUtils.getClientIp(request)).build();
     List<GrantedAuthority> authorities = new ArrayList<>();
     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-        tokenPayload.getIdentifier(),
+        principle,
         null,
         authorities);
-    authentication.setDetails(tokenPayload);
+    authentication.setDetails(details);
     return authentication;
   }
 

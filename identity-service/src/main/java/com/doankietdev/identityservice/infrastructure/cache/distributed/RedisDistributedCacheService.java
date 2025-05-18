@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class RedisDistributedCacheService implements DistributedCacheService {
+public class RedisDistributedCacheService<T> implements DistributedCacheService<T> {
   @Autowired
   private RedisTemplate<Object, Object> redisTemplate;
 
@@ -23,8 +23,8 @@ public class RedisDistributedCacheService implements DistributedCacheService {
   }
 
   @Override
-  public Object get(Object key) {
-    return redisTemplate.opsForValue().get(key);
+  public T get(Object key) {
+    return (T) redisTemplate.opsForValue().get(key);
   }
 
   @Override

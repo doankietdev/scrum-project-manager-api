@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.infrastructure.persistence.jpa.repository.mapper;
+package com.doankietdev.identityservice.infrastructure.mapper.jpa;
 
 import org.mapstruct.Mapper;
 
@@ -7,4 +7,4 @@ import com.doankietdev.identityservice.domain.model.entity.User;
 import com.doankietdev.identityservice.infrastructure.persistence.jpa.entity.UserEntity;
 
 @Mapper(componentModel = "spring")
-public interface UserMapper extends BaseMapper<User, UserEntity, UserCreate> {}
+public interface UserJpaMapper extends BaseJpaMapper<User, UserEntity, UserCreate> {}

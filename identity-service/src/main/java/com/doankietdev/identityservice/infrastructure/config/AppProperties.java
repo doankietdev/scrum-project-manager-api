@@ -2,8 +2,6 @@ package com.doankietdev.identityservice.infrastructure.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import lombok.AccessLevel;
@@ -19,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 public class AppProperties {
   @Value("${spring.profiles.active}")
   String envName;
-  
+
   Auth auth = new Auth();
 
   Cache cache = new Cache();

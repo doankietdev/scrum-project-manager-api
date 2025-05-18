@@ -39,7 +39,6 @@ import org.springframework.lang.Nullable;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 import com.doankietdev.identityservice.infrastructure.utils.FastJsonRedisDataSerializer;
 
 import cn.hutool.core.text.CharSequenceUtil;
@@ -85,7 +84,7 @@ public class RedisConfig extends CachingConfigurerSupport {
   @ConditionalOnMissingBean(name = "redisTemplate")
   RedisTemplate<Object, Object> redisTemplate(LettuceConnectionFactory lettuceConnectionFactory) {
     RedisTemplate<Object, Object> template = new RedisTemplate<>();
-    FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
+    FastJsonRedisDataSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisDataSerializer<>(Object.class);
     template.setValueSerializer(fastJsonRedisSerializer);
     template.setHashValueSerializer(fastJsonRedisSerializer);
     template.setKeySerializer(new StringRedisSerializer());
@@ -95,7 +94,7 @@ public class RedisConfig extends CachingConfigurerSupport {
   }
 
   @Bean(destroyMethod = "shutdown")
-  public RedissonClient redisson(RedisProperties redisProperties) {
+  RedissonClient redisson(RedisProperties redisProperties) {
     Config config = new Config();
     if (redisProperties.getSentinel() != null && !redisProperties.getSentinel().getNodes().isEmpty()) {
       SentinelServersConfig sentinelServersConfig = config.useSentinelServers();

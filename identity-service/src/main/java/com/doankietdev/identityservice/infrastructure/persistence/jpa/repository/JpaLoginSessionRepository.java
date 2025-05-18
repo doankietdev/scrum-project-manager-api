@@ -1,5 +1,6 @@
 package com.doankietdev.identityservice.infrastructure.persistence.jpa.repository;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.BeanUtils;
@@ -9,8 +10,8 @@ import com.doankietdev.identityservice.domain.model.dto.LoginSessionCreate;
 import com.doankietdev.identityservice.domain.model.dto.LoginSessionUpdate;
 import com.doankietdev.identityservice.domain.model.entity.LoginSession;
 import com.doankietdev.identityservice.domain.repository.LoginSessionRepository;
+import com.doankietdev.identityservice.infrastructure.mapper.jpa.LoginSessionJpaMapper;
 import com.doankietdev.identityservice.infrastructure.persistence.jpa.entity.LoginSessionEntity;
-import com.doankietdev.identityservice.infrastructure.persistence.jpa.repository.mapper.LoginSessionMapper;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,17 +24,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JpaLoginSessionRepository implements LoginSessionRepository {
   LoginSessionJpaStore loginSessionJpaStore;
-  LoginSessionMapper loginSessionMapper;
+  LoginSessionJpaMapper loginSessionJpaMapper;
 
   @Override
   public LoginSession findById(String id) {
-    return loginSessionMapper.toDomain(loginSessionJpaStore.findById(id).orElse(null));
+    return loginSessionJpaMapper.toDomain(loginSessionJpaStore.findById(id).orElse(null));
   }
 
   @Override
   public LoginSession save(LoginSessionCreate data) {
-    LoginSessionEntity loginSessionEntity = loginSessionJpaStore.save(loginSessionMapper.createToEntity(data));
-    return loginSessionMapper.toDomain(loginSessionJpaStore.findById(loginSessionEntity.getId())
+    LoginSessionEntity loginSessionEntity = loginSessionJpaStore.save(loginSessionJpaMapper.createToEntity(data));
+    return loginSessionJpaMapper.toDomain(loginSessionJpaStore.findById(loginSessionEntity.getId())
         .orElse(null));
   }
 
@@ -47,7 +48,7 @@ public class JpaLoginSessionRepository implements LoginSessionRepository {
 
     BeanUtils.copyProperties(updateData, existsLoginSessionEntity);
 
-    return loginSessionMapper.toDomain(loginSessionJpaStore.save(existsLoginSessionEntity));
+    return loginSessionJpaMapper.toDomain(loginSessionJpaStore.save(existsLoginSessionEntity));
   }
 
   @Override
@@ -82,6 +83,11 @@ public class JpaLoginSessionRepository implements LoginSessionRepository {
 
   @Override
   public LoginSession findByUserIdAndJti(String userId, String jti) {
-    return loginSessionMapper.toDomain(loginSessionJpaStore.findByUserIdAndJti(userId, jti));
+    return loginSessionJpaMapper.toDomain(loginSessionJpaStore.findByUserIdAndJti(userId, jti));
+  }
+
+  @Override
+  public List<LoginSession> findByUserId(String userId) {
+    return loginSessionJpaMapper.toDomainList(loginSessionJpaStore.findByUserId(userId));
   }
 }

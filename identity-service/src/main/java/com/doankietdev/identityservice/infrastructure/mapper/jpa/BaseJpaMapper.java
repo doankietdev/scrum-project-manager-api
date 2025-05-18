@@ -1,8 +1,8 @@
-package com.doankietdev.identityservice.infrastructure.persistence.jpa.repository.mapper;
+package com.doankietdev.identityservice.infrastructure.mapper.jpa;
 
 import org.mapstruct.Mapping;
 
-public interface BaseMapper<D, E, Create> {
+public interface BaseJpaMapper<D, E, Create> {
   D toDomain(E entity);
 
   E toEntity(D domain);

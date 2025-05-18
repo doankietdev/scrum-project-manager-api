@@ -9,8 +9,8 @@ import com.doankietdev.identityservice.domain.model.dto.UserCreate;
 import com.doankietdev.identityservice.domain.model.dto.UserUpdate;
 import com.doankietdev.identityservice.domain.model.entity.User;
 import com.doankietdev.identityservice.domain.repository.UserRepository;
+import com.doankietdev.identityservice.infrastructure.mapper.jpa.UserJpaMapper;
 import com.doankietdev.identityservice.infrastructure.persistence.jpa.entity.UserEntity;
-import com.doankietdev.identityservice.infrastructure.persistence.jpa.repository.mapper.UserMapper;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,17 +23,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JpaUserRepository implements UserRepository {
   UserJpaStore userJpaStore;
-  UserMapper userMapper;
+  UserJpaMapper userJpaMapper;
 
   @Override
   public User findById(String id) {
-    return userMapper.toDomain(userJpaStore.findById(id).orElse(null));
+    return userJpaMapper.toDomain(userJpaStore.findById(id).orElse(null));
   }
 
   @Override
   public User save(UserCreate data) {
-    UserEntity userEntity = userJpaStore.save(userMapper.createToEntity(data));
-    return userMapper.toDomain(userJpaStore.findById(userEntity.getId())
+    UserEntity userEntity = userJpaStore.save(userJpaMapper.createToEntity(data));
+    return userJpaMapper.toDomain(userJpaStore.findById(userEntity.getId())
         .orElse(null));
   }
 
@@ -47,7 +47,7 @@ public class JpaUserRepository implements UserRepository {
 
     BeanUtils.copyProperties(updateData, existsUserEntity);
 
-    return userMapper.toDomain(userJpaStore.save(existsUserEntity));
+    return userJpaMapper.toDomain(userJpaStore.save(existsUserEntity));
   }
 
   @Override
@@ -82,7 +82,7 @@ public class JpaUserRepository implements UserRepository {
 
   @Override
   public User findByIdentifier(String identifier) {
-    return userMapper.toDomain(userJpaStore.findByIdentifier(identifier)
+    return userJpaMapper.toDomain(userJpaStore.findByIdentifier(identifier)
         .orElse(null));
   }
 }

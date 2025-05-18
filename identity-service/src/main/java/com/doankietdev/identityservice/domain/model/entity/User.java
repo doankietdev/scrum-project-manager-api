@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @EqualsAndHashCode(callSuper=true)
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
   String identifier;
   String password;
@@ -21,7 +21,7 @@ public class User extends BaseEntity {
     return status == UserStatus.PENDING;
   }
 
-   public boolean isActive() {
+  public boolean isActive() {
     return status == UserStatus.ACTIVE;
   }
 }
