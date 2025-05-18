@@ -60,11 +60,8 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public RegisterResult register(RegisterCommand command) {
     User existingUser = userRepository.findByIdentifier(command.getIdentifier());
-    if (Objects.nonNull(existingUser)) {
-      throw AppException.builder()
-          .appCode(AppCode.USER_ALREADY_EXISTS)
-          .build();
-    }
+    if (Objects.nonNull(existingUser))
+      throw AppException.from(AppCode.USER_ALREADY_EXISTS);
 
     User newUser = userRepository.save(UserCreate.builder()
         .identifier(command.getIdentifier())
@@ -73,12 +70,8 @@ public class AuthServiceImpl implements AuthService {
         .status(UserStatus.PENDING)
         .build());
 
-    if (Objects.isNull(newUser)) {
-      throw AppException.builder()
-          .appCode(AppCode.SERVER_ERROR)
-          .logMessage("Failed to create user")
-          .build();
-    }
+    if (Objects.isNull(newUser))
+      throw AppException.from(AppCode.SERVER_ERROR);
 
     Otp newOtp = otpRepository.save(
         OtpCreate.builder()
@@ -89,10 +82,7 @@ public class AuthServiceImpl implements AuthService {
             .build());
 
     if (Objects.isNull(newOtp)) {
-      throw AppException.builder()
-          .appCode(AppCode.SERVER_ERROR)
-          .logMessage("Failed to create OTP")
-          .build();
+      throw AppException.from(AppCode.SERVER_ERROR).withLog("Failed to create OTP");
     }
 
     return RegisterResult.builder()
@@ -104,54 +94,35 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public VerifyAccountResult verifyAccount(VerifyAccountCommand command) {
     User existsUser = userRepository.findByIdentifier(command.getIdentifier());
-    if (Objects.isNull(existsUser)) {
-      throw AppException.builder()
-          .appCode(AppCode.USER_NOT_FOUND)
-          .build();
-    }
-
-    if (!existsUser.isNotVerifiedAccount()) {
-      throw AppException.builder()
-          .appCode(AppCode.ACCOUNT_VERIFY_IMPOSSIBLE)
-          .build();
-    }
-
+    if (Objects.isNull(existsUser))
+      throw AppException.from(AppCode.USER_NOT_FOUND);
+    if (!existsUser.isNotVerifiedAccount())
+      throw AppException.from(AppCode.ACCOUNT_VERIFY_IMPOSSIBLE);
     Otp existsOtp = otpRepository.findByUserIdAndCodeAndType(existsUser.getId(), command.getOtp(),
         OtpType.EMAIL_VERIFICATION);
-    if (Objects.isNull(existsOtp)) {
-      throw AppException.builder()
-          .appCode(AppCode.OTP_INVALID)
-          .build();
-    }
-
-    if (!existsOtp.isActive()) {
-      throw AppException.builder()
-          .appCode(AppCode.OTP_INVALID)
-          .build();
-    }
-
+    if (Objects.isNull(existsOtp))
+      throw AppException.from(AppCode.OTP_INVALID);
+    if (!existsOtp.isActive())
+      throw AppException.from(AppCode.OTP_INVALID);
     if (existsOtp.isExpired()) {
-      throw AppException.builder()
-          .appCode(AppCode.OTP_EXPIRED)
-          .build();
+      throw AppException.from(AppCode.OTP_EXPIRED);
     }
 
     User updatedUser = userRepository.updateById(existsUser.getId(),
         UserUpdate.builder().status(UserStatus.ACTIVE).build());
     if (Objects.isNull(updatedUser)) {
-      throw AppException.builder()
-          .appCode(AppCode.SERVER_ERROR)
-          .logMessage(String.format("Failed to update user status - User::%s - Update status::%s", existsUser,
-              UserStatus.ACTIVE))
-          .build();
+      throw AppException
+          .from(AppCode.SERVER_ERROR)
+          .withLog(String.format(
+              "Failed to update user status - User::%s - Update status::%s",
+              existsUser,
+              UserStatus.ACTIVE));
     }
 
     boolean isDeleteSuccess = otpRepository.deleteById(existsOtp.getId());
     if (!isDeleteSuccess) {
-      throw AppException.builder()
-          .appCode(AppCode.SERVER_ERROR)
-          .logMessage(String.format("Failed to delete OTP"))
-          .build();
+      throw AppException.from(AppCode.SERVER_ERROR)
+          .withLog(String.format("Failed to delete OTP"));
     }
 
     return VerifyAccountResult.builder()
@@ -165,30 +136,19 @@ public class AuthServiceImpl implements AuthService {
     User existsUser = userRepository.findByIdentifier(command.getIdentifier());
 
     if (Objects.isNull(existsUser)) {
-      throw AppException.builder()
-          .appCode(AppCode.CredentialIncorrect)
-          .logMessage(String.format("Login attempt failed: User not found - %s", command.getIdentifier()))
-          .build();
+      throw AppException.from(AppCode.CredentialIncorrect)
+          .withLog(String.format("Login attempt failed: User not found - %s", command.getIdentifier()));
     }
-
-    if (existsUser.isNotVerifiedAccount()) {
-      throw AppException.builder()
-          .appCode(AppCode.ACCOUNT_NOT_VERIFIED)
-          .build();
-    }
-
-    if (!existsUser.isActive()) {
-      throw AppException.builder()
-          .appCode(AppCode.ACCOUNT_INACTIVE)
-          .build();
-    }
+    if (existsUser.isNotVerifiedAccount())
+      throw AppException.from(AppCode.ACCOUNT_NOT_VERIFIED);
+    if (!existsUser.isActive())
+      throw AppException.from(AppCode.ACCOUNT_INACTIVE);
 
     boolean isPasswordMatch = passwordEncoder.matches(command.getPassword(), existsUser.getPassword());
     if (!isPasswordMatch) {
-      throw AppException.builder()
-          .appCode(AppCode.CredentialIncorrect)
-          .logMessage(String.format("Login attempt failed: Password not match "))
-          .build();
+      throw AppException
+          .from(AppCode.CredentialIncorrect)
+          .withLog(String.format("Login attempt failed: Password not match "));
     }
 
     KeyToken keyToken = keyTokenService.createKeyToken(TokenPayload.builder()

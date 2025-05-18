@@ -48,12 +48,13 @@ public class NimBusRSAKeyTokenService implements KeyTokenService {
     try {
       keyPair = createKeyPair();
     } catch (NoSuchAlgorithmException e) {
-      throw AppException.builder().appCode(AppCode.SERVER_ERROR).build();
+      throw AppException.from(AppCode.SERVER_ERROR);
     }
     RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
     RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
 
-    JWTClaimsSet refreshJWTClaimsSet = getJWTClaimsSet(payload, appProperties.getAuth().getRefreshTokenExpirationTime());
+    JWTClaimsSet refreshJWTClaimsSet = getJWTClaimsSet(payload,
+        appProperties.getAuth().getRefreshTokenExpirationTime());
     SignedJWT signedAccessJWT = new SignedJWT(getJWSHeader(),
         getJWTClaimsSet(payload, appProperties.getAuth().getAccessTokenExpirationTime()));
     SignedJWT signedRefreshJWT = new SignedJWT(getJWSHeader(), refreshJWTClaimsSet);
@@ -64,7 +65,7 @@ public class NimBusRSAKeyTokenService implements KeyTokenService {
       signedAccessJWT.sign(jwsSigner);
       signedRefreshJWT.sign(jwsSigner);
     } catch (JOSEException e) {
-      throw AppException.builder().appCode(AppCode.SERVER_ERROR).build();
+      throw AppException.from(AppCode.SERVER_ERROR);
     }
 
     return KeyToken.builder()
@@ -82,35 +83,35 @@ public class NimBusRSAKeyTokenService implements KeyTokenService {
     try {
       rsaPublicKey = convertToRSAPublicKey(publicKey);
     } catch (Exception e) {
-      throw AppException.builder().appCode(AppCode.SERVER_ERROR).build();
+      throw AppException.from(AppCode.SERVER_ERROR);
     }
 
     SignedJWT signedJWT;
     try {
       signedJWT = SignedJWT.parse(token);
     } catch (ParseException e) {
-      throw AppException.builder().appCode(AppCode.TOKEN_INVALID).build();
+      throw AppException.from(AppCode.TOKEN_INVALID);
     }
     boolean isValidSignature;
     try {
       isValidSignature = signedJWT.verify(getVerifier(rsaPublicKey));
     } catch (JOSEException e) {
-      throw AppException.builder().appCode(AppCode.TOKEN_INVALID).build();
+      throw AppException.from(AppCode.TOKEN_INVALID);
     }
     if (!isValidSignature)
-      throw AppException.builder().appCode(AppCode.TOKEN_INVALID).build();
+      throw AppException.from(AppCode.TOKEN_INVALID);
 
     JWTClaimsSet jwtClaimsSet;
     try {
       jwtClaimsSet = signedJWT.getJWTClaimsSet();
     } catch (ParseException e) {
-      throw AppException.builder().appCode(AppCode.SERVER_ERROR).build();
+      throw AppException.from(AppCode.SERVER_ERROR);
     }
     Instant expiresAt = jwtClaimsSet.getExpirationTime().toInstant();
     Instant now = Instant.now();
     boolean isExpiredToken = expiresAt.isBefore(now) || expiresAt.equals(now);
     if (isExpiredToken)
-      throw AppException.builder().appCode(AppCode.ACCESS_TOKEN_EXPIRED).build();
+      throw AppException.from(AppCode.ACCESS_TOKEN_EXPIRED);
 
     return TokenPayload.builder()
         .userId(jwtClaimsSet.getSubject())
@@ -128,7 +129,7 @@ public class NimBusRSAKeyTokenService implements KeyTokenService {
           .jti(jwtClaimsSet.getJWTID())
           .build();
     } catch (ParseException e) {
-      throw AppException.builder().appCode(AppCode.TOKEN_INVALID).build();
+      throw AppException.from(AppCode.TOKEN_INVALID);
     }
   }
 

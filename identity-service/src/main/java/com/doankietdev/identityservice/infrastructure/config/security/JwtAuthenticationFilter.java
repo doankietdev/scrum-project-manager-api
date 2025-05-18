@@ -93,24 +93,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       String authToken
       ) throws AppException {
     if (StringUtils.isEmpty(authToken)) {
-      throw AppException.builder().appCode(AppCode.TOKEN_MISSING).build();
+      throw AppException.from(AppCode.TOKEN_MISSING);
     }
 
     TokenPayload parsedTokenPayload = keyTokenService.parseToken(authToken);
     if (Objects.isNull(parsedTokenPayload)) {
-      throw AppException.builder().appCode(AppCode.SERVER_ERROR).build();
+      throw AppException.from(AppCode.SERVER_ERROR);
     }
 
     LoginSessionCache loginSessionCache = loginSessionCacheService.get(parsedTokenPayload.getUserId(),
     parsedTokenPayload.getJti());
 
     if (Objects.isNull(loginSessionCache)) {
-      throw AppException.builder().appCode(AppCode.TOKEN_INVALID).build();
+      throw AppException.from(AppCode.TOKEN_INVALID);
     }
 
     TokenPayload tokenPayload = keyTokenService.verifyToken(authToken, loginSessionCache.getPublicKey());
     if (Objects.isNull(tokenPayload)) {
-      throw AppException.builder().appCode(AppCode.SERVER_ERROR).build();
+      throw AppException.from(AppCode.SERVER_ERROR);
     }
 
     AuthUser principle = AuthUser.builder().id(tokenPayload.getUserId()).build();
