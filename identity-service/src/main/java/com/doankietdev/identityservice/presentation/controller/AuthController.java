@@ -2,6 +2,8 @@ package com.doankietdev.identityservice.presentation.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +13,7 @@ import com.doankietdev.identityservice.application.model.dto.LoginResult;
 import com.doankietdev.identityservice.application.model.dto.RegisterResult;
 import com.doankietdev.identityservice.application.model.dto.VerifyAccountResult;
 import com.doankietdev.identityservice.application.service.auth.AuthService;
+import com.doankietdev.identityservice.infrastructure.model.auth.AuthUser;
 import com.doankietdev.identityservice.presentation.mapper.AuthControllerMapper;
 import com.doankietdev.identityservice.presentation.model.dto.request.LoginRequest;
 import com.doankietdev.identityservice.presentation.model.dto.request.RegisterRequest;
@@ -71,6 +74,17 @@ public class AuthController {
     AppResponse<LoginResponse> response = AppResponse.<LoginResponse>builder()
         .data(authControllerMapper.toLoginResponse(result))
         .build();
+
+    return ResponseEntity.status(HttpStatus.OK).body(response);
+  }
+
+  @DeleteMapping("/logout")
+  public ResponseEntity<AppResponse> logout(Authentication authentication) {
+    AuthUser authUser = (AuthUser) authentication.getPrincipal();
+
+    authService.logout(authControllerMapper.toLogoutCommand(authUser));
+
+    AppResponse<?> response = AppResponse.builder().build();
 
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }

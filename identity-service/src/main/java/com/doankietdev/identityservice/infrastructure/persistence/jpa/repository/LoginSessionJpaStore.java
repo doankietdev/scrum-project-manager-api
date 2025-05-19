@@ -16,6 +16,10 @@ public interface LoginSessionJpaStore extends JpaRepository<LoginSessionEntity, 
   void deletePermanentById(@Param("id") String id);
 
   @Modifying(flushAutomatically = true)
+  @Query(value = "DELETE FROM LoginSessionEntity l WHERE l.user.id = :userId AND l.jti = :jti")
+  void deletePermanentByUserIdAndJti(@Param("userId") String userId, @Param("jti") String jti);
+
+  @Modifying(flushAutomatically = true)
   @Query(value = "UPDATE LoginSessionEntity l SET l.deletedAt = NULL WHERE l.id = :id")
   void restoreById(@Param("id") String id);
 

@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   RequestMatcher skipMatcher;
 
   public JwtAuthenticationFilter(KeyTokenService keyTokenService,
-  LoginSessionCacheService loginSessionCacheService, Endpoint[] publicEndpoints) {
+      LoginSessionCacheService loginSessionCacheService, Endpoint[] publicEndpoints) {
     this.keyTokenService = keyTokenService;
     this.loginSessionCacheService = loginSessionCacheService;
 
@@ -83,15 +83,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       }
       return;
     }
-    
+
     filterChain.doFilter(request, response);
   }
 
   private UsernamePasswordAuthenticationToken getAuthentication(
       HttpServletRequest request,
       HttpServletResponse response,
-      String authToken
-      ) throws AppException {
+      String authToken) throws AppException {
     if (StringUtils.isEmpty(authToken)) {
       throw AppException.from(AppCode.TOKEN_MISSING);
     }
@@ -102,19 +101,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     LoginSessionCache loginSessionCache = loginSessionCacheService.get(parsedTokenPayload.getUserId(),
-    parsedTokenPayload.getJti());
+        parsedTokenPayload.getJti());
 
-    if (Objects.isNull(loginSessionCache)) {
+    if (Objects.isNull(loginSessionCache) || Objects.isNull(loginSessionCache.getLoginSession())) {
       throw AppException.from(AppCode.TOKEN_INVALID);
     }
 
-    TokenPayload tokenPayload = keyTokenService.verifyToken(authToken, loginSessionCache.getPublicKey());
+    TokenPayload tokenPayload = keyTokenService.verifyToken(authToken, loginSessionCache.getLoginSession().getPublicKey());
     if (Objects.isNull(tokenPayload)) {
       throw AppException.from(AppCode.SERVER_ERROR);
     }
 
-    AuthUser principle = AuthUser.builder().id(tokenPayload.getUserId()).build();
-    AuthDetails details = AuthDetails.builder().clientIp(HttpRequestUtil.getClientIp(request)).build();
+    AuthUser principle = AuthUser.builder().id(tokenPayload.getUserId()).jti(tokenPayload.getJti()).build();
+    AuthDetails details = AuthDetails.builder().clientIp(HttpRequestUtil.getClientIp(request))
+        .userAgent(HttpRequestUtil.getUserAgent(request)).build();
     List<GrantedAuthority> authorities = new ArrayList<>();
     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
         principle,

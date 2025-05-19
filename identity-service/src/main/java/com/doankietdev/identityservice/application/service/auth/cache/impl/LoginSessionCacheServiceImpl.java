@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.doankietdev.identityservice.application.mapper.LoginSessionMapper;
 import com.doankietdev.identityservice.application.model.cache.LoginSessionCache;
+import com.doankietdev.identityservice.application.model.cache.LoginSessionCached;
 import com.doankietdev.identityservice.application.service.auth.cache.LoginSessionCacheService;
 import com.doankietdev.identityservice.application.spi.DistributedCacheService;
 import com.doankietdev.identityservice.domain.model.entity.LoginSession;
@@ -30,13 +31,12 @@ public class LoginSessionCacheServiceImpl implements LoginSessionCacheService {
 
   @Override
   public boolean put(String userId, String jti, LoginSessionCache loginSessionCache) {
-    return distributedCacheService.put(getCacheKey(userId, jti), loginSessionCache, appProperties.getAuth().getRefreshTokenExpirationTime());
+    return distributedCacheService.put(getLoginSessionCacheKey(userId, jti), loginSessionCache, appProperties.getAuth().getRefreshTokenExpirationTime());
   }
 
   @Override
   public LoginSessionCache get(String userId, String jti) {
-    LoginSessionCache loginSessionCache = distributedCacheService.get(getCacheKey(userId, jti));
-
+    LoginSessionCache loginSessionCache = distributedCacheService.get(getLoginSessionCacheKey(userId, jti));
 
     if (Objects.isNull(loginSessionCache)) {
       loginSessionCache = getFromDatabase(userId, jti);
@@ -44,14 +44,20 @@ public class LoginSessionCacheServiceImpl implements LoginSessionCacheService {
     return loginSessionCache;
   }
 
+  @Override
+  public boolean deleteLoginSession(String userId, String jti) {
+    return distributedCacheService.remove(getLoginSessionCacheKey(userId, jti));
+  }
+
   private LoginSessionCache getFromDatabase(String userId, String jti) {
     LoginSession loginSession = loginSessionRepository.findByUserIdAndJti(userId, jti);
-    LoginSessionCache loginSessionCache = loginSessionMapper.toLoginSessionCache(loginSession);
+    LoginSessionCached loginSessionCached = loginSessionMapper.toLoginSessionCached(loginSession);
+    LoginSessionCache loginSessionCache = LoginSessionCache.builder().loginSession(loginSessionCached).build();
     put(userId, jti, loginSessionCache);
     return loginSessionCache;
   }
   
-  private String getCacheKey(String userId, String jti) {
+  private String getLoginSessionCacheKey(String userId, String jti) {
     return CachePrefix.LOGIN_SESSION.getPrefix() + userId + ":" + jti;
   }
 }

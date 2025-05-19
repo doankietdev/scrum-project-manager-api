@@ -13,4 +13,6 @@ public interface LoginSessionRepository extends BaseRepository<LoginSession, Log
   LoginSession findByUserIdAndJti(String userId, String jti);
 
   Paginated<LoginSession> findByUserId(String userId, SessionSearchCriteria searchCriteria);
+
+  boolean deletePermanentByUserIdAndJti(String userId, String jti);
 }

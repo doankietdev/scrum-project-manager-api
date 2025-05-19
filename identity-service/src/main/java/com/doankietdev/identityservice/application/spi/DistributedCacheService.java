@@ -67,7 +67,11 @@ public interface DistributedCacheService<T> {
    * @param liveTime Lifetime in seconds
    * @return The result of the counter
    */
-  Long increment(String key, long liveTime);
+  Long increment(String key, Long liveTime);
+
+  Boolean setInt(String key, Integer value);
+
+  Integer getInt(String key);
 
   /**
    * Batch delete cache entries.

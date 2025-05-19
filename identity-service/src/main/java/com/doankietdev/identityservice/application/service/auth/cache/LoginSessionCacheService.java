@@ -5,4 +5,5 @@ import com.doankietdev.identityservice.application.model.cache.LoginSessionCache
 public interface LoginSessionCacheService {
   public boolean put(String userId, String jti, LoginSessionCache loginSessionCache);
   public LoginSessionCache get(String userId, String jti);
+  public boolean deleteLoginSession(String userId, String jti);
 }

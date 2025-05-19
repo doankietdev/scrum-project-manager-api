@@ -121,4 +121,15 @@ public class JpaLoginSessionRepository implements LoginSessionRepository {
 
     return paginated;
   }
+
+  @Override
+  public boolean deletePermanentByUserIdAndJti(String userId, String jti) {
+    try {
+      loginSessionJpaStore.deletePermanentByUserIdAndJti(userId, jti);
+      return true;
+    } catch (Exception e) {
+      log.info("e:: {}", e.getMessage());
+      return false;
+    }
+  }
 }

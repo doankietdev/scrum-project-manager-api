@@ -63,7 +63,7 @@ public class RedisDistributedCacheService<T> implements DistributedCacheService<
   }
 
   @Override
-  public Long increment(String key, long liveTime) {
+  public Long increment(String key, Long liveTime) {
     RedisConnectionFactory connectionFactory = redisTemplate.getConnectionFactory();
     if (connectionFactory == null) {
       log.error("RedisConnectionFactory is null when trying to increment key: {}", key);
@@ -81,5 +81,20 @@ public class RedisDistributedCacheService<T> implements DistributedCacheService<
   @Override
   public void batchDelete(Collection keys) {
     redisTemplate.delete(keys);
+  }
+
+  @Override
+  public Boolean setInt(String key, Integer value) {
+    try {
+      redisTemplate.opsForValue().set(key, value);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  @Override
+  public Integer getInt(String key) {
+    return (Integer) redisTemplate.opsForValue().get(key);
   }
 }

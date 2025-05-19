@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.infrastructure.model.auth;
+package com.doankietdev.identityservice.application.model.cache;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -8,7 +8,8 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthUser {
-  String id;
+public class LoginSessionCached {
+  String userId;
   String jti;
+  byte[] publicKey;
 }

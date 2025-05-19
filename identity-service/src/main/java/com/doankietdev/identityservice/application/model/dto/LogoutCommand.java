@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.infrastructure.model.auth;
+package com.doankietdev.identityservice.application.model.dto;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthUser {
-  String id;
+public class LogoutCommand {
+  String userId;
   String jti;
 }

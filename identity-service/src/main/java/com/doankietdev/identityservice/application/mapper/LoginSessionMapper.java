@@ -5,7 +5,7 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.doankietdev.identityservice.application.model.cache.LoginSessionCache;
+import com.doankietdev.identityservice.application.model.cache.LoginSessionCached;
 import com.doankietdev.identityservice.application.model.dto.SessionDTO;
 import com.doankietdev.identityservice.application.model.dto.SessionQuery;
 import com.doankietdev.identityservice.domain.model.dto.SessionSearchCriteria;
@@ -15,7 +15,7 @@ import com.doankietdev.identityservice.shared.model.Paginated;
 @Mapper(componentModel = "spring")
 public interface LoginSessionMapper {
   @Mapping(target = "userId", source = "user.id")
-  LoginSessionCache toLoginSessionCache(LoginSession loginSession);
+  LoginSessionCached toLoginSessionCached(LoginSession loginSession);
 
   @Mapping(target = "loginAt", source = "createdAt")
   SessionDTO toSessionDTO(LoginSession loginSession);

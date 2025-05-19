@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 
 import com.doankietdev.identityservice.application.exception.AppException;
 import com.doankietdev.identityservice.application.model.cache.LoginSessionCache;
+import com.doankietdev.identityservice.application.model.cache.LoginSessionCached;
 import com.doankietdev.identityservice.application.model.dto.KeyToken;
 import com.doankietdev.identityservice.application.model.dto.LoginCommand;
 import com.doankietdev.identityservice.application.model.dto.LoginResult;
+import com.doankietdev.identityservice.application.model.dto.LogoutCommand;
 import com.doankietdev.identityservice.application.model.dto.RegisterCommand;
 import com.doankietdev.identityservice.application.model.dto.RegisterResult;
 import com.doankietdev.identityservice.application.model.dto.TokenPayload;
@@ -170,15 +172,31 @@ public class AuthServiceImpl implements AuthService {
     String jti = loginSession.getJti();
 
     loginSessionCacheService.put(userId, jti, LoginSessionCache.builder()
-        .userId(userId)
-        .jti(jti)
-        .publicKey(loginSession.getPublicKey())
+        .loginSession(LoginSessionCached.builder()
+            .userId(userId)
+            .jti(jti)
+            .publicKey(loginSession.getPublicKey())
+            .build())
         .build());
 
     return LoginResult.builder()
         .accessToken(keyToken.getAccessToken())
         .refreshToken(keyToken.getRefreshToken())
         .build();
+  }
+
+  @Transactional
+  @Override
+  public void logout(LogoutCommand command) {
+    boolean isDeleteLoginSessionCache = loginSessionCacheService.deleteLoginSession(command.getUserId(),
+        command.getJti());
+    if (!isDeleteLoginSessionCache)
+      throw AppException.from(AppCode.SERVER_ERROR);
+
+    boolean isDeleteLoginSessionDB = loginSessionRepository.deletePermanentByUserIdAndJti(command.getUserId(),
+        command.getJti());
+    if (!isDeleteLoginSessionDB)
+      throw AppException.from(AppCode.SERVER_ERROR);
   }
 
   private String createRandomOtp(int length) {
