@@ -18,6 +18,7 @@ import com.doankietdev.identityservice.infrastructure.model.criteria.LoginSessio
 import com.doankietdev.identityservice.infrastructure.persistence.jpa.entity.LoginSessionEntity;
 import com.doankietdev.identityservice.infrastructure.persistence.jpa.specification.SpecificationBuilder;
 import com.doankietdev.identityservice.shared.model.Paginated;
+import com.doankietdev.identityservice.shared.model.Paging;
 
 import jakarta.annotation.Resource;
 import lombok.AccessLevel;
@@ -97,7 +98,7 @@ public class JpaLoginSessionRepository implements LoginSessionRepository {
   }
 
   @Override
-  public Paginated<LoginSession> findByUserId(String userId, SessionSearchCriteria sessionSearchCriteria) {    
+  public Paginated<LoginSession> findByUserId(String userId, SessionSearchCriteria sessionSearchCriteria) {
     return findByUserIdWithSpec(userId, sessionSearchCriteria);
   }
 
@@ -108,7 +109,16 @@ public class JpaLoginSessionRepository implements LoginSessionRepository {
     loginSessionCriteria.setUserId(userId);
 
     Specification<LoginSessionEntity> spec = loginSessionSpecificationBuilder.build(loginSessionCriteria);
-    
-    return loginSessionJpaMapper.toDomainPaginated(loginSessionJpaStore.findAll(spec, pageable));
+
+    Paginated<LoginSession> paginated = loginSessionJpaMapper.toDomainPaginated(loginSessionJpaStore.findAll(spec, pageable));
+
+    paginated.setPaging(Paging.builder()
+    .page(sessionSearchCriteria.getPage())
+    .limit(sessionSearchCriteria.getLimit())
+    .sort(sessionSearchCriteria.getSort())
+    .order(sessionSearchCriteria.getOrder())
+    .build());
+
+    return paginated;
   }
 }
