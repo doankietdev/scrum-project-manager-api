@@ -3,8 +3,8 @@ package com.doankietdev.identityservice.infrastructure.persistence.jpa.repositor
 import java.util.Objects;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import com.doankietdev.identityservice.domain.model.dto.LoginSessionCreate;
@@ -14,9 +14,12 @@ import com.doankietdev.identityservice.domain.model.entity.LoginSession;
 import com.doankietdev.identityservice.domain.repository.LoginSessionRepository;
 import com.doankietdev.identityservice.infrastructure.helper.PageHelper;
 import com.doankietdev.identityservice.infrastructure.mapper.jpa.LoginSessionJpaMapper;
+import com.doankietdev.identityservice.infrastructure.model.criteria.LoginSessionCriteria;
 import com.doankietdev.identityservice.infrastructure.persistence.jpa.entity.LoginSessionEntity;
+import com.doankietdev.identityservice.infrastructure.persistence.jpa.specification.SpecificationBuilder;
 import com.doankietdev.identityservice.shared.model.Paginated;
 
+import jakarta.annotation.Resource;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,6 +32,9 @@ import lombok.extern.slf4j.Slf4j;
 public class JpaLoginSessionRepository implements LoginSessionRepository {
   LoginSessionJpaStore loginSessionJpaStore;
   LoginSessionJpaMapper loginSessionJpaMapper;
+
+  @Resource
+  SpecificationBuilder loginSessionSpecificationBuilder;
 
   @Override
   public LoginSession findById(String id) {
@@ -91,11 +97,18 @@ public class JpaLoginSessionRepository implements LoginSessionRepository {
   }
 
   @Override
-  public Paginated<LoginSession> findByUserId(String userId, SessionSearchCriteria searchCriteria) {
-    Pageable pageable = PageHelper.buildJpaPageable(searchCriteria);
+  public Paginated<LoginSession> findByUserId(String userId, SessionSearchCriteria sessionSearchCriteria) {    
+    return findByUserIdWithSpec(userId, sessionSearchCriteria);
+  }
 
-    Page<LoginSessionEntity> loginSessionPage = loginSessionJpaStore.findByUserId(userId, pageable);
+  private Paginated<LoginSession> findByUserIdWithSpec(String userId, SessionSearchCriteria sessionSearchCriteria) {
+    Pageable pageable = PageHelper.buildJpaPageable(sessionSearchCriteria);
 
-    return loginSessionJpaMapper.toDomainPaginated(loginSessionPage);
+    LoginSessionCriteria loginSessionCriteria = loginSessionJpaMapper.toLoginSessionCriteria(sessionSearchCriteria);
+    loginSessionCriteria.setUserId(userId);
+
+    Specification<LoginSessionEntity> spec = loginSessionSpecificationBuilder.build(loginSessionCriteria);
+    
+    return loginSessionJpaMapper.toDomainPaginated(loginSessionJpaStore.findAll(spec, pageable));
   }
 }

@@ -33,6 +33,7 @@ public class UserServiceImpl implements UserService {
   public Paginated<SessionDTO> getMySessions(String userId, SessionQuery sessionQuery) {
     sessionQuery.setSort(loginSessionSortFieldMapper.map(sessionQuery.getSort()));
     SessionSearchCriteria searchCriteria = loginSessionMapper.toSessionSearchCriteria(sessionQuery);
+
     Paginated<LoginSession> paginated = loginSessionRepository.findByUserId(userId, searchCriteria);
     return loginSessionMapper.toSessionDTOPaginated(paginated);
   }

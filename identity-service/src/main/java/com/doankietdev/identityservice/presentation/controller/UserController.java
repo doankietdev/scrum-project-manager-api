@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.doankietdev.identityservice.application.model.dto.SessionDTO;
+import com.doankietdev.identityservice.application.model.dto.SessionQuery;
 import com.doankietdev.identityservice.application.service.user.UserService;
 import com.doankietdev.identityservice.infrastructure.model.auth.AuthUser;
 import com.doankietdev.identityservice.presentation.mapper.UserControllerMapper;
@@ -34,7 +35,9 @@ public class UserController {
   public ResponseEntity<AppResponse> getMySessions(SessionParamsRequest params, Authentication authentication) {
     AuthUser authUser = (AuthUser) authentication.getPrincipal();
 
-    Paginated<SessionDTO> sessionDTOPaginated = userService.getMySessions(authUser.getId(), userControllerMapper.toSessionQuery(params));
+    SessionQuery sessionQuery = userControllerMapper.toSessionQuery(params);
+
+    Paginated<SessionDTO> sessionDTOPaginated = userService.getMySessions(authUser.getId(), sessionQuery);
 
     Paginated<SessionResponse> sessionResponsePaginated = userControllerMapper.toSessionResponsePaginated(sessionDTOPaginated);
 
