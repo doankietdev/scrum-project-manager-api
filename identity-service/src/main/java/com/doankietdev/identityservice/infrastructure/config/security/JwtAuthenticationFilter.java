@@ -25,7 +25,7 @@ import com.doankietdev.identityservice.application.spi.KeyTokenService;
 import com.doankietdev.identityservice.infrastructure.model.Endpoint;
 import com.doankietdev.identityservice.infrastructure.model.auth.AuthDetails;
 import com.doankietdev.identityservice.infrastructure.model.auth.AuthUser;
-import com.doankietdev.identityservice.shared.utils.HttpRequestUtils;
+import com.doankietdev.identityservice.shared.utils.HttpRequestUtil;
 import com.doankietdev.identityservice.shared.utils.ResponseUtil;
 
 import jakarta.servlet.FilterChain;
@@ -114,7 +114,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     AuthUser principle = AuthUser.builder().id(tokenPayload.getUserId()).build();
-    AuthDetails details = AuthDetails.builder().clientIp(HttpRequestUtils.getClientIp(request)).build();
+    AuthDetails details = AuthDetails.builder().clientIp(HttpRequestUtil.getClientIp(request)).build();
     List<GrantedAuthority> authorities = new ArrayList<>();
     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
         principle,

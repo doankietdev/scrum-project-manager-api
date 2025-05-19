@@ -7,7 +7,10 @@ import org.mapstruct.Mapping;
 
 import com.doankietdev.identityservice.application.model.cache.LoginSessionCache;
 import com.doankietdev.identityservice.application.model.dto.SessionDTO;
+import com.doankietdev.identityservice.application.model.dto.SessionQuery;
+import com.doankietdev.identityservice.domain.model.dto.SessionSearchCriteria;
 import com.doankietdev.identityservice.domain.model.entity.LoginSession;
+import com.doankietdev.identityservice.shared.model.Paginated;
 
 @Mapper(componentModel = "spring")
 public interface LoginSessionMapper {
@@ -17,5 +20,19 @@ public interface LoginSessionMapper {
   @Mapping(target = "loginAt", source = "createdAt")
   SessionDTO toSessionDTO(LoginSession loginSession);
 
-  List<SessionDTO> toSessionDTOList(List<LoginSession> loginSessions);
+  default Paginated<SessionDTO> toSessionDTOPaginated(Paginated<LoginSession> loginSessionPaginated) {
+    List<SessionDTO> items = loginSessionPaginated.getItems()
+      .stream()
+      .map(this::toSessionDTO)
+      .toList();
+
+    return Paginated.<SessionDTO>builder()
+      .items(items)
+      .paging(loginSessionPaginated.getPaging())
+      .totalItems(loginSessionPaginated.getTotalItems())
+      .totalPages(loginSessionPaginated.getTotalPages())
+      .build();
+  }
+
+  SessionSearchCriteria toSessionSearchCriteria(SessionQuery sessionQuery);
 }

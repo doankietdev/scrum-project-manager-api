@@ -1,7 +1,9 @@
 package com.doankietdev.identityservice.application.service.user;
 
-import com.doankietdev.identityservice.application.model.dto.GetMySessionsResult;
+import com.doankietdev.identityservice.application.model.dto.SessionDTO;
+import com.doankietdev.identityservice.application.model.dto.SessionQuery;
+import com.doankietdev.identityservice.shared.model.Paginated;
 
 public interface UserService {
-  public GetMySessionsResult getMySessions(String userId);
+  public Paginated<SessionDTO> getMySessions(String userId, SessionQuery sessionQuery);
 }

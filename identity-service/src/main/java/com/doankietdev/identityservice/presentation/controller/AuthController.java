@@ -19,7 +19,7 @@ import com.doankietdev.identityservice.presentation.model.dto.response.AppRespon
 import com.doankietdev.identityservice.presentation.model.dto.response.LoginResponse;
 import com.doankietdev.identityservice.presentation.model.dto.response.RegisterResponse;
 import com.doankietdev.identityservice.presentation.model.dto.response.VerifyAccountResponse;
-import com.doankietdev.identityservice.shared.utils.HttpRequestUtils;
+import com.doankietdev.identityservice.shared.utils.HttpRequestUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -63,8 +63,8 @@ public class AuthController {
   public ResponseEntity<AppResponse> login(@RequestBody LoginRequest request,
       HttpServletRequest httpServletRequest) {
 
-    String clientIp = HttpRequestUtils.getClientIp(httpServletRequest);
-    String userAgent = HttpRequestUtils.getUserAgent(httpServletRequest);
+    String clientIp = HttpRequestUtil.getClientIp(httpServletRequest);
+    String userAgent = HttpRequestUtil.getUserAgent(httpServletRequest);
 
     LoginResult result = authService.login(authControllerMapper.toLoginCommand(request), clientIp, userAgent);
 

@@ -7,12 +7,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.doankietdev.identityservice.application.model.dto.GetMySessionsResult;
+import com.doankietdev.identityservice.application.model.dto.SessionDTO;
 import com.doankietdev.identityservice.application.service.user.UserService;
 import com.doankietdev.identityservice.infrastructure.model.auth.AuthUser;
 import com.doankietdev.identityservice.presentation.mapper.UserControllerMapper;
+import com.doankietdev.identityservice.presentation.model.dto.request.SessionParamsRequest;
 import com.doankietdev.identityservice.presentation.model.dto.response.AppResponse;
-import com.doankietdev.identityservice.presentation.model.dto.response.GetMySessionsResponse;
+import com.doankietdev.identityservice.presentation.model.dto.response.SessionResponse;
+import com.doankietdev.identityservice.shared.model.Paginated;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,15 +31,15 @@ public class UserController {
   UserControllerMapper userControllerMapper;
 
   @GetMapping("/me/sessions")
-  public ResponseEntity<AppResponse> getMySessions(Authentication authentication) {
+  public ResponseEntity<AppResponse> getMySessions(SessionParamsRequest params, Authentication authentication) {
     AuthUser authUser = (AuthUser) authentication.getPrincipal();
 
-    GetMySessionsResult getMySessionsResult = userService.getMySessions(authUser.getId());
+    Paginated<SessionDTO> sessionDTOPaginated = userService.getMySessions(authUser.getId(), userControllerMapper.toSessionQuery(params));
 
-    GetMySessionsResponse getMySessionsResponse = userControllerMapper.toGetMySessionsResponse(getMySessionsResult.getSessions());
+    Paginated<SessionResponse> sessionResponsePaginated = userControllerMapper.toSessionResponsePaginated(sessionDTOPaginated);
 
-    AppResponse<GetMySessionsResponse> response = AppResponse.<GetMySessionsResponse>builder()
-        .data(getMySessionsResponse)
+    AppResponse<Paginated<SessionResponse>> response = AppResponse.<Paginated<SessionResponse>>builder()
+        .data(sessionResponsePaginated)
         .build();
 
     return ResponseEntity.status(HttpStatus.OK).body(response);
