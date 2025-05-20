@@ -1,5 +1,7 @@
 package com.doankietdev.identityservice.domain.model.entity;
 
+import java.util.List;
+
 import com.doankietdev.identityservice.domain.model.enums.IdentityType;
 import com.doankietdev.identityservice.domain.model.enums.UserStatus;
 
@@ -16,6 +18,7 @@ public class User extends BaseEntity {
   String password;
   IdentityType identityType;
   UserStatus status;
+  List<Role> roles;
 
   public boolean isNotVerifiedAccount() {
     return status == UserStatus.PENDING;

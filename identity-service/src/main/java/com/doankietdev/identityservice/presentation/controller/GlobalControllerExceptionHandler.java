@@ -1,6 +1,7 @@
 package com.doankietdev.identityservice.presentation.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -20,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalControllerExceptionHandler {
   AppProperties appProperties;
 
-  @ExceptionHandler(value = RuntimeException.class)
+  @ExceptionHandler(RuntimeException.class)
   ResponseEntity<ErrorResponse<?>> handleException(RuntimeException e) {
     boolean isDev = appProperties.getEnvName().equals("dev");
 
@@ -39,7 +40,26 @@ public class GlobalControllerExceptionHandler {
         .body(response);
   }
 
-  @ExceptionHandler(value = AppException.class)
+  @ExceptionHandler(AuthorizationDeniedException.class)
+  ResponseEntity<ErrorResponse<?>> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+    boolean isDev = appProperties.getEnvName().equals("dev");
+
+    if (isDev) {
+      e.printStackTrace();
+    }
+
+    AppCode appCode = AppCode.ACCESS_DENIED;
+
+    ErrorResponse<?> response = ErrorResponse.builder()
+        .code(appCode.getCode())
+        .message(appCode.getMessage())
+        .logMessage(isDev ? e.getMessage() : null)
+        .build();
+    return ResponseEntity.status(appCode.getStatusCode())
+        .body(response);
+  }
+
+  @ExceptionHandler(AppException.class)
   ResponseEntity<ErrorResponse<?>> handleAppException(AppException e) {
     boolean isDev = appProperties.getEnvName().equals("dev");
 

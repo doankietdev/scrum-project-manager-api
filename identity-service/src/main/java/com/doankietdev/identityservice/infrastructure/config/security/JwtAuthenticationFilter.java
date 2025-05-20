@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
@@ -17,9 +18,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.doankietdev.identityservice.application.exception.AppException;
+import com.doankietdev.identityservice.application.model.cache.AuthoritiesCache;
 import com.doankietdev.identityservice.application.model.cache.LoginSessionCache;
 import com.doankietdev.identityservice.application.model.dto.TokenPayload;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
+import com.doankietdev.identityservice.application.service.auth.cache.AuthorityCacheService;
 import com.doankietdev.identityservice.application.service.auth.cache.LoginSessionCacheService;
 import com.doankietdev.identityservice.application.spi.KeyTokenService;
 import com.doankietdev.identityservice.infrastructure.model.Endpoint;
@@ -41,12 +44,15 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
   KeyTokenService keyTokenService;
   LoginSessionCacheService loginSessionCacheService;
+  AuthorityCacheService authorityCacheService;
   RequestMatcher skipMatcher;
 
   public JwtAuthenticationFilter(KeyTokenService keyTokenService,
-      LoginSessionCacheService loginSessionCacheService, Endpoint[] publicEndpoints) {
+      LoginSessionCacheService loginSessionCacheService, AuthorityCacheService authorityCacheService,
+      Endpoint[] publicEndpoints) {
     this.keyTokenService = keyTokenService;
     this.loginSessionCacheService = loginSessionCacheService;
+    this.authorityCacheService = authorityCacheService;
 
     List<RequestMatcher> matchers = Arrays.stream(publicEndpoints)
         .map(ep -> new AntPathRequestMatcher(ep.getUrl(), ep.getMethod().name()))
@@ -107,15 +113,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       throw AppException.from(AppCode.TOKEN_INVALID);
     }
 
-    TokenPayload tokenPayload = keyTokenService.verifyToken(authToken, loginSessionCache.getLoginSession().getPublicKey());
+    TokenPayload tokenPayload = keyTokenService.verifyToken(authToken,
+        loginSessionCache.getLoginSession().getPublicKey());
     if (Objects.isNull(tokenPayload)) {
       throw AppException.from(AppCode.SERVER_ERROR);
+    }
+
+    AuthoritiesCache authoritiesCache = authorityCacheService.get(tokenPayload.getUserId());
+
+    List<GrantedAuthority> authorities = new ArrayList<>();
+    if (Objects.nonNull(authoritiesCache.getAuthorities())) {
+      authorities = authoritiesCache.getAuthorities().stream()
+        .map(name -> (GrantedAuthority) new SimpleGrantedAuthority(name))
+        .toList();
     }
 
     AuthUser principle = AuthUser.builder().id(tokenPayload.getUserId()).jti(tokenPayload.getJti()).build();
     AuthDetails details = AuthDetails.builder().clientIp(HttpRequestUtil.getClientIp(request))
         .userAgent(HttpRequestUtil.getUserAgent(request)).build();
-    List<GrantedAuthority> authorities = new ArrayList<>();
     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
         principle,
         null,

@@ -3,7 +3,8 @@ package com.doankietdev.identityservice.shared.utils;
 
 public enum CachePrefix {
   LOGIN_SESSION,
-  TOKEN_REVOKED;
+  TOKEN_REVOKED,
+  AUTHORITIES;
 
   private final String SERVICE_NAME = "IDENTITY";
 

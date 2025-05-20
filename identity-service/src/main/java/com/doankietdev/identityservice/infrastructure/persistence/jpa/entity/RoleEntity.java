@@ -1,16 +1,17 @@
 package com.doankietdev.identityservice.infrastructure.persistence.jpa.entity;
 
-import java.time.Instant;
+import java.util.Set;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -23,26 +24,20 @@ import lombok.experimental.FieldDefaults;
 @ToString(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "`login_sessions`")
-@SQLDelete(sql = "UPDATE `login_sessions` SET deleted_at = now() WHERE id = ?")
+@Table(name = "roles")
+@SQLDelete(sql = "UPDATE `roles` SET deleted_at = now() WHERE id = ?")
 @Where(clause = "deleted_at IS NULL")
 @DynamicInsert
 @DynamicUpdate
-public class LoginSessionEntity extends BaseEntity {
-  @ManyToOne(targetEntity = UserEntity.class)
-  @JoinColumn(name = "user_id", columnDefinition = "CHAR(36)", nullable = false)
-  UserEntity user;
+public class RoleEntity extends BaseEntity {
+  String name;
+  String description;
 
-  @Column(columnDefinition = "BLOB")
-  byte[] publicKey;
-
-  @Column(columnDefinition = "CHAR(36)")
-  String jti;
-
-  @Column(columnDefinition = "VARCHAR(45)")
-  String ipAddress;
-
-  String userAgent;
-
-  Instant expiresAt;
+  @ManyToMany(cascade = CascadeType.ALL)
+  @JoinTable(
+    name = "role_permissions",
+    joinColumns = @JoinColumn(name = "role_id"),
+    inverseJoinColumns = @JoinColumn(name = "permission_id")
+  )
+  Set<PermissionEntity> permissions;
 }
