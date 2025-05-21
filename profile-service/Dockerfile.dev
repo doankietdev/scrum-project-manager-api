@@ -1,0 +1,15 @@
+FROM eclipse-temurin:21-jdk
+
+USER root
+RUN apt-get update && apt-get install -y curl jq && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -ms /bin/bash devuser
+USER devuser
+
+WORKDIR /home/devuser/app
+
+COPY --chown=devuser:devuser .mvn/ .mvn
+COPY --chown=devuser:devuser mvnw ./
+RUN chmod +x mvnw
+
+CMD ["./mvnw", "spring-boot:run"]

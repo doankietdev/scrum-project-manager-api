@@ -5,7 +5,7 @@ spring:
       minimum-idle: 2
       idle-timeout: 30000
       connection-timeout: 2000
-    url: jdbc:mysql://mysql:3306/identity_service
+    url: jdbc:mysql://mysql:3306/profile_service
     username: dev
     password: dev
     driver-class-name: com.mysql.cj.jdbc.Driver

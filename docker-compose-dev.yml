@@ -306,6 +306,45 @@ services:
       api-gateway:
         condition: service_healthy
 
+  profile-service:
+    container_name: profile-service
+    build:
+      context: ./profile-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./profile-service/src:/home/devuser/app/src
+      - ./profile-service/target:/home/devuser/app/target
+      - ./profile-service/pom.xml:/home/devuser/app/pom.xml
+      - ./environment/.m2:/home/devuser/.m2
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s http://localhost:8082/actuator/health | jq -r .status | grep -q UP",
+        ]
+      interval: 30s
+      timeout: 120s
+      retries: 3
+    networks:
+      - scrum-project-manager-backend-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis-master:
+        condition: service_healthy
+      redis-slave-1:
+        condition: service_healthy
+      redis-slave-2:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+
 networks:
   scrum-project-manager-backend-network:
     name: scrum-project-manager-backend-network

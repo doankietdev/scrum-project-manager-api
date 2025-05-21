@@ -1,4 +1,4 @@
-package com.doankietdev.identityservice.infrastructure.config.security;
+package com.doankietdev.profileservice.infrastructure.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,11 +18,8 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import com.doankietdev.identityservice.application.service.auth.cache.AuthorityCacheService;
-import com.doankietdev.identityservice.application.service.auth.cache.LoginSessionCacheService;
-import com.doankietdev.identityservice.application.spi.KeyTokenService;
-import com.doankietdev.identityservice.infrastructure.config.AppProperties;
-import com.doankietdev.identityservice.infrastructure.model.Endpoint;
+import com.doankietdev.profileservice.infrastructure.config.AppProperties;
+import com.doankietdev.profileservice.infrastructure.model.Endpoint;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -42,21 +39,12 @@ public class SecurityConfig {
       Endpoint.builder().method(HttpMethod.POST).url("/actuator/**").build(),
       Endpoint.builder().method(HttpMethod.PATCH).url("/actuator/**").build(),
       Endpoint.builder().method(HttpMethod.PUT).url("/actuator/**").build(),
-      Endpoint.builder().method(HttpMethod.POST).url("/auth/register").build(),
-      Endpoint.builder().method(HttpMethod.POST).url("/auth/login").build(),
-      Endpoint.builder().method(HttpMethod.POST).url("/auth/verify").build(),
-      Endpoint.builder().method(HttpMethod.GET).url("/rpc/**").build(),
-      Endpoint.builder().method(HttpMethod.POST).url("/rpc/**").build(),
-      Endpoint.builder().method(HttpMethod.PUT).url("/rpc/**").build(),
-      Endpoint.builder().method(HttpMethod.PATCH).url("/rpc/**").build()
+      Endpoint.builder().method(HttpMethod.POST).url("/rpc/introspect").build()
   };
 
   CorsConfigurationSource corsConfigurationSource;
   AuthenticationEntryPoint authenticationEntryPoint;
   AccessDeniedHandler accessDeniedHandler;
-  KeyTokenService keyTokenService;
-  LoginSessionCacheService loginSessionCacheService;
-  AuthorityCacheService authorityCacheService;
   AppProperties appProperties;
 
   @Bean
@@ -76,9 +64,9 @@ public class SecurityConfig {
             .disable())
         .headers(c -> c.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
         .addFilterBefore(
-            new JwtAuthenticationFilter(keyTokenService, loginSessionCacheService, authorityCacheService, appProperties,
-                IGNORE_ENDPOINTS),
+            new GatewayAuthenticationFilter(appProperties, IGNORE_ENDPOINTS),
             UsernamePasswordAuthenticationFilter.class);
+
     return httpSecurity.build();
   }
 

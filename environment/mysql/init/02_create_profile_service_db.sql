@@ -1,0 +1,4 @@
+CREATE DATABASE IF NOT EXISTS profile_service;
+
+GRANT ALL PRIVILEGES ON profile_service.* TO 'dev'@'%';
+FLUSH PRIVILEGES;
