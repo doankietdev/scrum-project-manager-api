@@ -109,7 +109,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     LoginSessionCache loginSessionCache = loginSessionCacheService.get(parsedTokenPayload.getUserId(),
         parsedTokenPayload.getJti());
 
-    if (Objects.isNull(loginSessionCache) || Objects.isNull(loginSessionCache.getLoginSession())) {
+    if (Objects.isNull(loginSessionCache.getLoginSession())) {
       throw AppException.from(AppCode.TOKEN_INVALID);
     }
 

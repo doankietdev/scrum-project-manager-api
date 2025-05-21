@@ -35,7 +35,7 @@ CREATE TABLE `login_sessions` (
     `expires_at` TIMESTAMP NOT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    `deleted_at` TIMESTAMP NULL,
+    `deleted_at` TIMESTAMP NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores the history of login/logout events';
 ALTER TABLE `login_sessions` 
     ADD UNIQUE `unique_login_session_user_id_jti`(`user_id`, `jti`);
