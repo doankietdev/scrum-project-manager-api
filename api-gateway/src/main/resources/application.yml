@@ -18,6 +18,11 @@ spring:
       discovery:
         locator:
           enabled: true
+      routes:
+        - id: identity_service
+          uri: lb://identity-service
+          predicates:
+            - Path=/auth/**
 
 eureka:
   instance:
@@ -32,3 +37,8 @@ management:
   endpoint:
     health:
       show-details: always
+
+app:
+  services:
+    identity-service:
+      base-url: http://identity-service

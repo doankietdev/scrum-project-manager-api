@@ -52,13 +52,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   public JwtAuthenticationFilter(KeyTokenService keyTokenService,
       LoginSessionCacheService loginSessionCacheService, AuthorityCacheService authorityCacheService,
       AppProperties appProperties,
-      Endpoint[] publicEndpoints) {
+      Endpoint[] ignoreEndpoints) {
     this.keyTokenService = keyTokenService;
     this.loginSessionCacheService = loginSessionCacheService;
     this.authorityCacheService = authorityCacheService;
     this.appProperties = appProperties;
 
-    List<RequestMatcher> matchers = Arrays.stream(publicEndpoints)
+    List<RequestMatcher> matchers = Arrays.stream(ignoreEndpoints)
         .map(ep -> new AntPathRequestMatcher(ep.getUrl(), ep.getMethod().name()))
         .collect(Collectors.toList());
     this.skipMatcher = new OrRequestMatcher(matchers);

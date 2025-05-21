@@ -1,6 +1,5 @@
 package com.doankietdev.identityservice.infrastructure.config.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -26,65 +25,62 @@ import com.doankietdev.identityservice.infrastructure.config.AppProperties;
 import com.doankietdev.identityservice.infrastructure.model.Endpoint;
 
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @EnableMethodSecurity
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class SecurityConfig {
-  final Endpoint[] PUBLIC_ENDPOINTS = {
+  @NonFinal
+  Endpoint[] IGNORE_ENDPOINTS = {
       Endpoint.builder().method(HttpMethod.POST).url("/auth/register").build(),
       Endpoint.builder().method(HttpMethod.POST).url("/auth/login").build(),
-      Endpoint.builder().method(HttpMethod.POST).url("/auth/verify").build()
+      Endpoint.builder().method(HttpMethod.POST).url("/auth/verify").build(),
+      Endpoint.builder().method(HttpMethod.GET).url("/rpc/**").build(),
+      Endpoint.builder().method(HttpMethod.POST).url("/rpc/**").build(),
+      Endpoint.builder().method(HttpMethod.PUT).url("/rpc/**").build(),
+      Endpoint.builder().method(HttpMethod.PATCH).url("/rpc/**").build()
   };
 
-  @Autowired
   CorsConfigurationSource corsConfigurationSource;
-
-  @Autowired
   AuthenticationEntryPoint authenticationEntryPoint;
-
-  @Autowired
   AccessDeniedHandler accessDeniedHandler;
-
-  @Autowired
   KeyTokenService keyTokenService;
-
-  @Autowired
   LoginSessionCacheService loginSessionCacheService;
-
-  @Autowired
   AuthorityCacheService authorityCacheService;
-
-  @Autowired
   AppProperties appProperties;
 
   @Bean
   SecurityFilterChain securityFilterChain(
       HttpSecurity httpSecurity,
       AuthenticationConfiguration authenticationConfiguration) throws Exception {
-    httpSecurity.authorizeHttpRequests(authorize -> {
-      for (Endpoint endpoint : PUBLIC_ENDPOINTS) {
-        authorize.requestMatchers(endpoint.getMethod(), endpoint.getUrl()).permitAll();
-      }
-      authorize.anyRequest().authenticated();
-    })
+    httpSecurity.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
         .csrf(AbstractHttpConfigurer::disable)
         .cors(cors -> cors.configurationSource(corsConfigurationSource))
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .exceptionHandling(
-            c -> c.authenticationEntryPoint(authenticationEntryPoint).accessDeniedHandler(accessDeniedHandler))
-        .headers(c -> c.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
-
-    httpSecurity.addFilterBefore(new JwtAuthenticationFilter(keyTokenService, loginSessionCacheService, authorityCacheService, appProperties, PUBLIC_ENDPOINTS),
-        UsernamePasswordAuthenticationFilter.class);
-
+            exception -> exception.authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler))
+        .formLogin(login -> login
+            .disable())
+        .httpBasic(basic -> basic
+            .disable())
+        .headers(c -> c.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+        .addFilterBefore(
+            new JwtAuthenticationFilter(keyTokenService, loginSessionCacheService, authorityCacheService, appProperties,
+                IGNORE_ENDPOINTS),
+            UsernamePasswordAuthenticationFilter.class);
     return httpSecurity.build();
   }
 
   @Bean
   AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-      return config.getAuthenticationManager();
+    return config.getAuthenticationManager();
   }
 
   @Bean

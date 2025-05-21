@@ -27,8 +27,9 @@ public enum AppCode {
     /**
      * User - code: 100xx
      */
-    USER_NOT_FOUND(10001, "Account does not exist", HttpStatus.NOT_FOUND),
-    USER_ALREADY_EXISTS(10002, "Account already exists", HttpStatus.CONFLICT),
+    USER_NOT_FOUND(10001, "User not found", HttpStatus.NOT_FOUND),
+    ACCOUNT_NOTFOUND(10002, "Account does not exist", HttpStatus.NOT_FOUND),
+    USER_ALREADY_EXISTS(10003, "Account already exists", HttpStatus.CONFLICT),
 
     /**
      * OTP - code: 101xx

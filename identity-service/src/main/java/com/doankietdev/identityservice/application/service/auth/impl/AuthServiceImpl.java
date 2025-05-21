@@ -97,7 +97,7 @@ public class AuthServiceImpl implements AuthService {
   public VerifyAccountResult verifyAccount(VerifyAccountCommand command) {
     User existsUser = userRepository.findByIdentifier(command.getIdentifier());
     if (Objects.isNull(existsUser))
-      throw AppException.from(AppCode.USER_NOT_FOUND);
+      throw AppException.from(AppCode.ACCOUNT_NOTFOUND);
     if (!existsUser.isNotVerifiedAccount())
       throw AppException.from(AppCode.ACCOUNT_VERIFY_IMPOSSIBLE);
     Otp existsOtp = otpRepository.findByUserIdAndCodeAndType(existsUser.getId(), command.getOtp(),

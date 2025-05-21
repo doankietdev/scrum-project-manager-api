@@ -5,5 +5,5 @@ import com.doankietdev.identityservice.application.model.dto.SessionQuery;
 import com.doankietdev.identityservice.shared.model.Paginated;
 
 public interface UserService {
-  public Paginated<SessionDTO> getMySessions(String userId, SessionQuery sessionQuery);
+  public Paginated<SessionDTO> getUserSessions(String userId, SessionQuery sessionQuery);
 }
