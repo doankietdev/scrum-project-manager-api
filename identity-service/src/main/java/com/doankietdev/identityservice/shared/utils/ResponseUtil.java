@@ -4,8 +4,9 @@ import java.io.IOException;
 
 import org.springframework.http.MediaType;
 
+import com.doankietdev.identityservice.application.exception.AppException;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
-import com.doankietdev.identityservice.presentation.model.dto.response.AppResponse;
+import com.doankietdev.identityservice.presentation.model.dto.response.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.ServletOutputStream;
@@ -20,10 +21,13 @@ public class ResponseUtil {
   static String ENCODING = "UTF-8";
   static String CONTENT_TYPE = MediaType.APPLICATION_JSON_VALUE;
 
-  public static void output(HttpServletResponse response, AppCode appCode) {
-    AppResponse<?> appResponse = AppResponse.builder()
+  public static void outputError(HttpServletResponse response, AppException appException, Boolean isDev) {
+    AppCode appCode = appException.getAppCode();
+    
+    ErrorResponse<?> errorResponse = ErrorResponse.builder()
           .code(appCode.getCode())
           .message(appCode.getMessage())
+          .logMessage(isDev ? appException.getLogMessage() : null)
           .build();
 
     ServletOutputStream servletOutputStream = null;
@@ -35,7 +39,7 @@ public class ResponseUtil {
       ObjectMapper objectMapper = new ObjectMapper();
 
       servletOutputStream = response.getOutputStream();
-      servletOutputStream.write(objectMapper.writeValueAsBytes(appResponse));
+      servletOutputStream.write(objectMapper.writeValueAsBytes(errorResponse));
     } catch (Exception e) {
       log.error("Output response error:", e);
     } finally {

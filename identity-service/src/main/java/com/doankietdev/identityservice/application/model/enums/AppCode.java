@@ -18,7 +18,7 @@ import lombok.experimental.FieldDefaults;
 public enum AppCode {
     SUCCESS(HttpStatus.OK.value(), "Success", HttpStatus.OK),
     PARAMS_ERROR(HttpStatus.BAD_REQUEST.value(), "Invalid parameters", HttpStatus.BAD_REQUEST),
-    NOT_FOUND(HttpStatus.NOT_FOUND.value(), "Not found", HttpStatus.NOT_FOUND),
+    ENDPOINT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "This endpoint is not supported", HttpStatus.NOT_FOUND),
     SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Server error, please try again later",
             HttpStatus.INTERNAL_SERVER_ERROR),
     RATE_LIMIT_ERROR(HttpStatus.TOO_MANY_REQUESTS.value(), "Access too frequently, please try again later",

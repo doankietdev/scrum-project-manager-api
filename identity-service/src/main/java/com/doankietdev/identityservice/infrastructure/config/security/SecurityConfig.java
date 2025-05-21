@@ -22,6 +22,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import com.doankietdev.identityservice.application.service.auth.cache.AuthorityCacheService;
 import com.doankietdev.identityservice.application.service.auth.cache.LoginSessionCacheService;
 import com.doankietdev.identityservice.application.spi.KeyTokenService;
+import com.doankietdev.identityservice.infrastructure.config.AppProperties;
 import com.doankietdev.identityservice.infrastructure.model.Endpoint;
 
 import lombok.AccessLevel;
@@ -55,6 +56,9 @@ public class SecurityConfig {
   @Autowired
   AuthorityCacheService authorityCacheService;
 
+  @Autowired
+  AppProperties appProperties;
+
   @Bean
   SecurityFilterChain securityFilterChain(
       HttpSecurity httpSecurity,
@@ -72,7 +76,7 @@ public class SecurityConfig {
             c -> c.authenticationEntryPoint(authenticationEntryPoint).accessDeniedHandler(accessDeniedHandler))
         .headers(c -> c.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
 
-    httpSecurity.addFilterBefore(new JwtAuthenticationFilter(keyTokenService, loginSessionCacheService, authorityCacheService, PUBLIC_ENDPOINTS),
+    httpSecurity.addFilterBefore(new JwtAuthenticationFilter(keyTokenService, loginSessionCacheService, authorityCacheService, appProperties, PUBLIC_ENDPOINTS),
         UsernamePasswordAuthenticationFilter.class);
 
     return httpSecurity.build();

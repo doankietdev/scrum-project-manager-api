@@ -25,6 +25,7 @@ import com.doankietdev.identityservice.application.model.enums.AppCode;
 import com.doankietdev.identityservice.application.service.auth.cache.AuthorityCacheService;
 import com.doankietdev.identityservice.application.service.auth.cache.LoginSessionCacheService;
 import com.doankietdev.identityservice.application.spi.KeyTokenService;
+import com.doankietdev.identityservice.infrastructure.config.AppProperties;
 import com.doankietdev.identityservice.infrastructure.model.Endpoint;
 import com.doankietdev.identityservice.infrastructure.model.auth.AuthDetails;
 import com.doankietdev.identityservice.infrastructure.model.auth.AuthUser;
@@ -46,13 +47,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   LoginSessionCacheService loginSessionCacheService;
   AuthorityCacheService authorityCacheService;
   RequestMatcher skipMatcher;
+  AppProperties appProperties;
 
   public JwtAuthenticationFilter(KeyTokenService keyTokenService,
       LoginSessionCacheService loginSessionCacheService, AuthorityCacheService authorityCacheService,
+      AppProperties appProperties,
       Endpoint[] publicEndpoints) {
     this.keyTokenService = keyTokenService;
     this.loginSessionCacheService = loginSessionCacheService;
     this.authorityCacheService = authorityCacheService;
+    this.appProperties = appProperties;
 
     List<RequestMatcher> matchers = Arrays.stream(publicEndpoints)
         .map(ep -> new AntPathRequestMatcher(ep.getUrl(), ep.getMethod().name()))
@@ -79,13 +83,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return;
       }
       SecurityContextHolder.getContext().setAuthentication(authentication);
-    } catch (Exception e) {
-      if (e instanceof AppException) {
-        AppException appException = (AppException) e;
-        ResponseUtil.output(response, appException.getAppCode());
+    } catch (Exception exception) {
+      Boolean isDev = appProperties.getEnvName().equals("dev");
+      if (exception instanceof AppException) {
+        AppException appException = (AppException) exception;
+        ResponseUtil.outputError(response, appException, isDev);
       } else {
-        e.printStackTrace();
-        ResponseUtil.output(response, AppCode.SERVER_ERROR);
+        AppException appException = AppException.from(AppCode.SERVER_ERROR).withLog(exception.getMessage());
+        ResponseUtil.outputError(response, appException, isDev);
       }
       return;
     }
@@ -110,13 +115,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         parsedTokenPayload.getJti());
 
     if (Objects.isNull(loginSessionCache.getLoginSession())) {
-      throw AppException.from(AppCode.TOKEN_INVALID);
+      throw AppException.from(AppCode.TOKEN_INVALID).withLog(authToken);
     }
 
     TokenPayload tokenPayload = keyTokenService.verifyToken(authToken,
         loginSessionCache.getLoginSession().getPublicKey());
     if (Objects.isNull(tokenPayload)) {
-      throw AppException.from(AppCode.SERVER_ERROR);
+      throw AppException.from(AppCode.SERVER_ERROR).withLog("Failed to verify token");
     }
 
     AuthoritiesCache authoritiesCache = authorityCacheService.get(tokenPayload.getUserId());
@@ -124,8 +129,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     List<GrantedAuthority> authorities = new ArrayList<>();
     if (Objects.nonNull(authoritiesCache.getAuthorities())) {
       authorities = authoritiesCache.getAuthorities().stream()
-        .map(name -> (GrantedAuthority) new SimpleGrantedAuthority(name))
-        .toList();
+          .map(name -> (GrantedAuthority) new SimpleGrantedAuthority(name))
+          .toList();
     }
 
     AuthUser principle = AuthUser.builder().id(tokenPayload.getUserId()).jti(tokenPayload.getJti()).build();

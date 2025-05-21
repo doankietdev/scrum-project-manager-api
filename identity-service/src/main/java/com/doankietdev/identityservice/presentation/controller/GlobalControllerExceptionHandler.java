@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.doankietdev.identityservice.application.exception.AppException;
 import com.doankietdev.identityservice.application.model.enums.AppCode;
@@ -22,11 +23,10 @@ public class GlobalControllerExceptionHandler {
   AppProperties appProperties;
 
   @ExceptionHandler(RuntimeException.class)
-  ResponseEntity<ErrorResponse<?>> handleException(RuntimeException e) {
+  ResponseEntity<ErrorResponse<?>> handleException(RuntimeException exception) {
     boolean isDev = appProperties.getEnvName().equals("dev");
-
     if (isDev) {
-      e.printStackTrace();
+      exception.printStackTrace();
     }
 
     AppCode appCode = AppCode.SERVER_ERROR;
@@ -34,18 +34,17 @@ public class GlobalControllerExceptionHandler {
     ErrorResponse<?> response = ErrorResponse.builder()
         .code(appCode.getCode())
         .message(appCode.getMessage())
-        .logMessage(isDev ? e.getMessage() : null)
+        .logMessage(isDev ? exception.getMessage() : null)
         .build();
     return ResponseEntity.status(appCode.getStatusCode())
         .body(response);
   }
 
   @ExceptionHandler(AuthorizationDeniedException.class)
-  ResponseEntity<ErrorResponse<?>> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+  ResponseEntity<ErrorResponse<?>> handleAuthorizationDeniedException(AuthorizationDeniedException exception) {
     boolean isDev = appProperties.getEnvName().equals("dev");
-
     if (isDev) {
-      e.printStackTrace();
+      exception.printStackTrace();
     }
 
     AppCode appCode = AppCode.ACCESS_DENIED;
@@ -53,26 +52,43 @@ public class GlobalControllerExceptionHandler {
     ErrorResponse<?> response = ErrorResponse.builder()
         .code(appCode.getCode())
         .message(appCode.getMessage())
-        .logMessage(isDev ? e.getMessage() : null)
+        .logMessage(isDev ? exception.getMessage() : null)
+        .build();
+    return ResponseEntity.status(appCode.getStatusCode())
+        .body(response);
+  }
+
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<?> handleNotFound(NoResourceFoundException exception) {
+    boolean isDev = appProperties.getEnvName().equals("dev");
+    if (isDev) {
+      exception.printStackTrace();
+    }
+
+    AppCode appCode = AppCode.ENDPOINT_NOT_FOUND;
+
+    ErrorResponse<?> response = ErrorResponse.builder()
+        .code(appCode.getCode())
+        .message(appCode.getMessage())
+        .logMessage(isDev ? exception.getMessage() : null)
         .build();
     return ResponseEntity.status(appCode.getStatusCode())
         .body(response);
   }
 
   @ExceptionHandler(AppException.class)
-  ResponseEntity<ErrorResponse<?>> handleAppException(AppException e) {
+  ResponseEntity<ErrorResponse<?>> handleAppException(AppException exception) {
     boolean isDev = appProperties.getEnvName().equals("dev");
-
     if (isDev) {
-      e.printStackTrace();
+      exception.printStackTrace();
     }
 
-    AppCode appCode = e.getAppCode();
+    AppCode appCode = exception.getAppCode();
 
     ErrorResponse<?> response = ErrorResponse.builder()
         .code(appCode.getCode())
         .message(appCode.getMessage())
-        .logMessage(isDev ? e.getLogMessage() : null)
+        .logMessage(isDev ? exception.getLogMessage() : null)
         .build();
     return ResponseEntity.status(appCode.getStatusCode())
         .body(response);
